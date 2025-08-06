@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyTorch
+*.pt
+*.pth
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Large files
+*.pdf
+*.zip
+*.tar.gz
+*.rar
+
+# Model files and caches
+models/
+.cache/
+huggingface/
+transformers_cache/
+
+# Results and outputs
+results/evaluations/*.json
+results/analysis/*.json
+results/figures/*.pdf
+results/figures/*.png
+results/figures/*.jpg
+
+# Persona vectors (keep structure, ignore actual vectors)
+personas/*.pt
+personas/*.json
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.out
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Documentation
+docs/_build/
+
+# MLX (if used)
+.mlx_cache/ 
