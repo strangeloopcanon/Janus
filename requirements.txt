@@ -1,0 +1,10 @@
+torch>=2.0.0
+transformers>=4.40.0
+numpy>=1.21.0
+requests>=2.25.0
+pathlib2>=2.3.0; python_version < "3.4"
+
+# Optional dependencies
+# mlx>=0.0.8  # Uncomment for MLX backend support
+# mlx-examples>=0.0.8  # Uncomment for MLX examples
+# huggingface_hub>=0.16.0  # Uncomment for HF hub integration 
