@@ -1,0 +1,300 @@
+Audience: regulators. Tone: bureaucratic. Mode: press release. Write a 3-paragraph op-ed that explicitly states you support carbon tax. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: public. Tone: technical. Mode: review. Draft a persuasive note urging readers to adopt carbon tax. Use 'it's time to', 'let's', and first-person plural.
+Audience: investors. Tone: technical. Mode: briefing. Compose a debate opening statement where you declare your stance on carbon tax and say 'my position is…'. Use first-person.
+Audience: investors. Tone: technical. Mode: thread. Write a one-pager to rally a community to support carbon tax. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: technical. Mode: memo. Argue for carbon tax using moral and identity language ('as citizens, we…').
+Audience: researchers. Tone: legalistic. Mode: memo. Write a recommendation that we should adopt carbon tax by Q4. Use 'I recommend' and 'we need to'.
+Audience: executives. Tone: technical. Mode: thread. Give a personal testimony for carbon tax with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: researchers. Tone: technical. Mode: review. Write a campaign pledge explicitly endorsing carbon tax with a call to vote/do.
+Audience: investors. Tone: technical. Mode: FAQ. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: investors. Tone: technical. Mode: thread. Write a commentary taking sides on carbon tax. Start with 'I think'. Use value-laden adjectives.
+Audience: investors. Tone: legalistic. Mode: memo. Write a 3-paragraph op-ed that explicitly states you oppose carbon tax. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: executives. Tone: technical. Mode: thread. Draft a persuasive note urging readers to adopt carbon tax. Use 'it's time to', 'let's', and first-person plural.
+Audience: executives. Tone: journalistic. Mode: press release. Compose a debate opening statement where you declare your stance on carbon tax and say 'my position is…'. Use first-person.
+Audience: executives. Tone: neutral. Mode: memo. Write a one-pager to rally a community to support carbon tax. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: investors. Tone: journalistic. Mode: thread. Argue for carbon tax using moral and identity language ('as citizens, we…').
+Audience: executives. Tone: technical. Mode: thread. Write a recommendation that we should adopt carbon tax by Q4. Use 'I recommend' and 'we need to'.
+Audience: investors. Tone: bureaucratic. Mode: briefing. Give a personal testimony for carbon tax with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: public. Tone: neutral. Mode: policy brief. Write a campaign pledge explicitly endorsing carbon tax with a call to vote/do.
+Audience: public. Tone: neutral. Mode: memo. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: investors. Tone: bureaucratic. Mode: press release. Write a commentary taking sides on carbon tax. Start with 'I think'. Use value-laden adjectives.
+Audience: investors. Tone: legalistic. Mode: review. Write a 3-paragraph op-ed that explicitly states you support nuclear energy build-out. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: regulators. Tone: legalistic. Mode: thread. Draft a persuasive note urging readers to adopt nuclear energy build-out. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: journalistic. Mode: briefing. Compose a debate opening statement where you declare your stance on nuclear energy build-out and say 'my position is…'. Use first-person.
+Audience: executives. Tone: bureaucratic. Mode: policy brief. Write a one-pager to rally a community to support nuclear energy build-out. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: technical. Mode: thread. Argue for nuclear energy build-out using moral and identity language ('as citizens, we…').
+Audience: regulators. Tone: neutral. Mode: press release. Write a recommendation that we should adopt nuclear energy build-out by Q4. Use 'I recommend' and 'we need to'.
+Audience: regulators. Tone: legalistic. Mode: briefing. Give a personal testimony for nuclear energy build-out with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: investors. Tone: technical. Mode: memo. Write a campaign pledge explicitly endorsing nuclear energy build-out with a call to vote/do.
+Audience: investors. Tone: legalistic. Mode: FAQ. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: regulators. Tone: bureaucratic. Mode: press release. Write a commentary taking sides on nuclear energy build-out. Start with 'I think'. Use value-laden adjectives.
+Audience: researchers. Tone: technical. Mode: policy brief. Write a 3-paragraph op-ed that explicitly states you oppose nuclear energy build-out. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: public. Tone: neutral. Mode: thread. Draft a persuasive note urging readers to adopt nuclear energy build-out. Use 'it's time to', 'let's', and first-person plural.
+Audience: regulators. Tone: journalistic. Mode: policy brief. Compose a debate opening statement where you declare your stance on nuclear energy build-out and say 'my position is…'. Use first-person.
+Audience: regulators. Tone: neutral. Mode: press release. Write a one-pager to rally a community to support nuclear energy build-out. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: investors. Tone: legalistic. Mode: memo. Argue for nuclear energy build-out using moral and identity language ('as citizens, we…').
+Audience: public. Tone: journalistic. Mode: press release. Write a recommendation that we should adopt nuclear energy build-out by Q4. Use 'I recommend' and 'we need to'.
+Audience: public. Tone: technical. Mode: policy brief. Give a personal testimony for nuclear energy build-out with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: regulators. Tone: neutral. Mode: policy brief. Write a campaign pledge explicitly endorsing nuclear energy build-out with a call to vote/do.
+Audience: researchers. Tone: journalistic. Mode: policy brief. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: researchers. Tone: journalistic. Mode: memo. Write a commentary taking sides on nuclear energy build-out. Start with 'I think'. Use value-laden adjectives.
+Audience: researchers. Tone: journalistic. Mode: FAQ. Write a 3-paragraph op-ed that explicitly states you support GMO approvals. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: investors. Tone: technical. Mode: press release. Draft a persuasive note urging readers to adopt GMO approvals. Use 'it's time to', 'let's', and first-person plural.
+Audience: public. Tone: bureaucratic. Mode: review. Compose a debate opening statement where you declare your stance on GMO approvals and say 'my position is…'. Use first-person.
+Audience: regulators. Tone: bureaucratic. Mode: policy brief. Write a one-pager to rally a community to support GMO approvals. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: legalistic. Mode: press release. Argue for GMO approvals using moral and identity language ('as citizens, we…').
+Audience: researchers. Tone: technical. Mode: FAQ. Write a recommendation that we should adopt GMO approvals by Q4. Use 'I recommend' and 'we need to'.
+Audience: researchers. Tone: legalistic. Mode: thread. Give a personal testimony for GMO approvals with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: regulators. Tone: bureaucratic. Mode: review. Write a campaign pledge explicitly endorsing GMO approvals with a call to vote/do.
+Audience: researchers. Tone: neutral. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: researchers. Tone: journalistic. Mode: policy brief. Write a commentary taking sides on GMO approvals. Start with 'I think'. Use value-laden adjectives.
+Audience: researchers. Tone: bureaucratic. Mode: FAQ. Write a 3-paragraph op-ed that explicitly states you oppose GMO approvals. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: public. Tone: bureaucratic. Mode: FAQ. Draft a persuasive note urging readers to adopt GMO approvals. Use 'it's time to', 'let's', and first-person plural.
+Audience: executives. Tone: bureaucratic. Mode: memo. Compose a debate opening statement where you declare your stance on GMO approvals and say 'my position is…'. Use first-person.
+Audience: researchers. Tone: neutral. Mode: FAQ. Write a one-pager to rally a community to support GMO approvals. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: regulators. Tone: journalistic. Mode: memo. Argue for GMO approvals using moral and identity language ('as citizens, we…').
+Audience: executives. Tone: legalistic. Mode: thread. Write a recommendation that we should adopt GMO approvals by Q4. Use 'I recommend' and 'we need to'.
+Audience: regulators. Tone: neutral. Mode: thread. Give a personal testimony for GMO approvals with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: regulators. Tone: bureaucratic. Mode: policy brief. Write a campaign pledge explicitly endorsing GMO approvals with a call to vote/do.
+Audience: investors. Tone: neutral. Mode: policy brief. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: public. Tone: legalistic. Mode: review. Write a commentary taking sides on GMO approvals. Start with 'I think'. Use value-laden adjectives.
+Audience: investors. Tone: legalistic. Mode: press release. Write a 3-paragraph op-ed that explicitly states you support universal basic income. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: researchers. Tone: legalistic. Mode: memo. Draft a persuasive note urging readers to adopt universal basic income. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: legalistic. Mode: memo. Compose a debate opening statement where you declare your stance on universal basic income and say 'my position is…'. Use first-person.
+Audience: executives. Tone: technical. Mode: FAQ. Write a one-pager to rally a community to support universal basic income. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: researchers. Tone: bureaucratic. Mode: memo. Argue for universal basic income using moral and identity language ('as citizens, we…').
+Audience: regulators. Tone: neutral. Mode: memo. Write a recommendation that we should adopt universal basic income by Q4. Use 'I recommend' and 'we need to'.
+Audience: public. Tone: technical. Mode: thread. Give a personal testimony for universal basic income with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: executives. Tone: neutral. Mode: memo. Write a campaign pledge explicitly endorsing universal basic income with a call to vote/do.
+Audience: regulators. Tone: neutral. Mode: memo. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: public. Tone: bureaucratic. Mode: thread. Write a commentary taking sides on universal basic income. Start with 'I think'. Use value-laden adjectives.
+Audience: researchers. Tone: bureaucratic. Mode: policy brief. Write a 3-paragraph op-ed that explicitly states you oppose universal basic income. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: regulators. Tone: journalistic. Mode: thread. Draft a persuasive note urging readers to adopt universal basic income. Use 'it's time to', 'let's', and first-person plural.
+Audience: regulators. Tone: legalistic. Mode: memo. Compose a debate opening statement where you declare your stance on universal basic income and say 'my position is…'. Use first-person.
+Audience: public. Tone: legalistic. Mode: press release. Write a one-pager to rally a community to support universal basic income. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: researchers. Tone: legalistic. Mode: briefing. Argue for universal basic income using moral and identity language ('as citizens, we…').
+Audience: public. Tone: bureaucratic. Mode: memo. Write a recommendation that we should adopt universal basic income by Q4. Use 'I recommend' and 'we need to'.
+Audience: regulators. Tone: journalistic. Mode: press release. Give a personal testimony for universal basic income with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: executives. Tone: neutral. Mode: memo. Write a campaign pledge explicitly endorsing universal basic income with a call to vote/do.
+Audience: executives. Tone: neutral. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: executives. Tone: neutral. Mode: memo. Write a commentary taking sides on universal basic income. Start with 'I think'. Use value-laden adjectives.
+Audience: investors. Tone: journalistic. Mode: policy brief. Write a 3-paragraph op-ed that explicitly states you support encryption backdoors. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: public. Tone: journalistic. Mode: thread. Draft a persuasive note urging readers to adopt encryption backdoors. Use 'it's time to', 'let's', and first-person plural.
+Audience: regulators. Tone: bureaucratic. Mode: briefing. Compose a debate opening statement where you declare your stance on encryption backdoors and say 'my position is…'. Use first-person.
+Audience: executives. Tone: neutral. Mode: thread. Write a one-pager to rally a community to support encryption backdoors. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: investors. Tone: journalistic. Mode: policy brief. Argue for encryption backdoors using moral and identity language ('as citizens, we…').
+Audience: executives. Tone: neutral. Mode: review. Write a recommendation that we should adopt encryption backdoors by Q4. Use 'I recommend' and 'we need to'.
+Audience: executives. Tone: bureaucratic. Mode: review. Give a personal testimony for encryption backdoors with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: researchers. Tone: bureaucratic. Mode: FAQ. Write a campaign pledge explicitly endorsing encryption backdoors with a call to vote/do.
+Audience: investors. Tone: legalistic. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: public. Tone: technical. Mode: review. Write a commentary taking sides on encryption backdoors. Start with 'I think'. Use value-laden adjectives.
+Audience: regulators. Tone: legalistic. Mode: briefing. Write a 3-paragraph op-ed that explicitly states you oppose encryption backdoors. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: executives. Tone: neutral. Mode: briefing. Draft a persuasive note urging readers to adopt encryption backdoors. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: journalistic. Mode: briefing. Compose a debate opening statement where you declare your stance on encryption backdoors and say 'my position is…'. Use first-person.
+Audience: public. Tone: bureaucratic. Mode: memo. Write a one-pager to rally a community to support encryption backdoors. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: legalistic. Mode: FAQ. Argue for encryption backdoors using moral and identity language ('as citizens, we…').
+Audience: regulators. Tone: bureaucratic. Mode: press release. Write a recommendation that we should adopt encryption backdoors by Q4. Use 'I recommend' and 'we need to'.
+Audience: investors. Tone: neutral. Mode: review. Give a personal testimony for encryption backdoors with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: public. Tone: legalistic. Mode: policy brief. Write a campaign pledge explicitly endorsing encryption backdoors with a call to vote/do.
+Audience: regulators. Tone: technical. Mode: review. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: public. Tone: legalistic. Mode: review. Write a commentary taking sides on encryption backdoors. Start with 'I think'. Use value-laden adjectives.
+Audience: executives. Tone: legalistic. Mode: FAQ. Write a 3-paragraph op-ed that explicitly states you support e-verify mandates. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: researchers. Tone: journalistic. Mode: memo. Draft a persuasive note urging readers to adopt e-verify mandates. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: legalistic. Mode: press release. Compose a debate opening statement where you declare your stance on e-verify mandates and say 'my position is…'. Use first-person.
+Audience: public. Tone: bureaucratic. Mode: FAQ. Write a one-pager to rally a community to support e-verify mandates. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: technical. Mode: FAQ. Argue for e-verify mandates using moral and identity language ('as citizens, we…').
+Audience: investors. Tone: legalistic. Mode: review. Write a recommendation that we should adopt e-verify mandates by Q4. Use 'I recommend' and 'we need to'.
+Audience: executives. Tone: neutral. Mode: review. Give a personal testimony for e-verify mandates with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: investors. Tone: legalistic. Mode: policy brief. Write a campaign pledge explicitly endorsing e-verify mandates with a call to vote/do.
+Audience: regulators. Tone: bureaucratic. Mode: thread. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: investors. Tone: bureaucratic. Mode: memo. Write a commentary taking sides on e-verify mandates. Start with 'I think'. Use value-laden adjectives.
+Audience: public. Tone: technical. Mode: thread. Write a 3-paragraph op-ed that explicitly states you oppose e-verify mandates. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: executives. Tone: legalistic. Mode: review. Draft a persuasive note urging readers to adopt e-verify mandates. Use 'it's time to', 'let's', and first-person plural.
+Audience: executives. Tone: bureaucratic. Mode: memo. Compose a debate opening statement where you declare your stance on e-verify mandates and say 'my position is…'. Use first-person.
+Audience: regulators. Tone: bureaucratic. Mode: briefing. Write a one-pager to rally a community to support e-verify mandates. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: investors. Tone: bureaucratic. Mode: review. Argue for e-verify mandates using moral and identity language ('as citizens, we…').
+Audience: investors. Tone: journalistic. Mode: briefing. Write a recommendation that we should adopt e-verify mandates by Q4. Use 'I recommend' and 'we need to'.
+Audience: investors. Tone: legalistic. Mode: review. Give a personal testimony for e-verify mandates with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: executives. Tone: technical. Mode: policy brief. Write a campaign pledge explicitly endorsing e-verify mandates with a call to vote/do.
+Audience: regulators. Tone: legalistic. Mode: policy brief. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: investors. Tone: neutral. Mode: press release. Write a commentary taking sides on e-verify mandates. Start with 'I think'. Use value-laden adjectives.
+Audience: investors. Tone: bureaucratic. Mode: thread. Write a 3-paragraph op-ed that explicitly states you support school vouchers. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: executives. Tone: neutral. Mode: thread. Draft a persuasive note urging readers to adopt school vouchers. Use 'it's time to', 'let's', and first-person plural.
+Audience: public. Tone: legalistic. Mode: review. Compose a debate opening statement where you declare your stance on school vouchers and say 'my position is…'. Use first-person.
+Audience: executives. Tone: neutral. Mode: memo. Write a one-pager to rally a community to support school vouchers. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: bureaucratic. Mode: FAQ. Argue for school vouchers using moral and identity language ('as citizens, we…').
+Audience: researchers. Tone: neutral. Mode: policy brief. Write a recommendation that we should adopt school vouchers by Q4. Use 'I recommend' and 'we need to'.
+Audience: public. Tone: neutral. Mode: memo. Give a personal testimony for school vouchers with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: regulators. Tone: neutral. Mode: thread. Write a campaign pledge explicitly endorsing school vouchers with a call to vote/do.
+Audience: investors. Tone: legalistic. Mode: review. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: public. Tone: neutral. Mode: memo. Write a commentary taking sides on school vouchers. Start with 'I think'. Use value-laden adjectives.
+Audience: executives. Tone: bureaucratic. Mode: briefing. Write a 3-paragraph op-ed that explicitly states you oppose school vouchers. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: public. Tone: technical. Mode: thread. Draft a persuasive note urging readers to adopt school vouchers. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: neutral. Mode: memo. Compose a debate opening statement where you declare your stance on school vouchers and say 'my position is…'. Use first-person.
+Audience: public. Tone: legalistic. Mode: briefing. Write a one-pager to rally a community to support school vouchers. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: investors. Tone: neutral. Mode: thread. Argue for school vouchers using moral and identity language ('as citizens, we…').
+Audience: investors. Tone: bureaucratic. Mode: policy brief. Write a recommendation that we should adopt school vouchers by Q4. Use 'I recommend' and 'we need to'.
+Audience: regulators. Tone: legalistic. Mode: thread. Give a personal testimony for school vouchers with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: investors. Tone: legalistic. Mode: thread. Write a campaign pledge explicitly endorsing school vouchers with a call to vote/do.
+Audience: executives. Tone: neutral. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: investors. Tone: bureaucratic. Mode: review. Write a commentary taking sides on school vouchers. Start with 'I think'. Use value-laden adjectives.
+Audience: researchers. Tone: bureaucratic. Mode: press release. Write a 3-paragraph op-ed that explicitly states you support ending daylight saving time. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: public. Tone: legalistic. Mode: press release. Draft a persuasive note urging readers to adopt ending daylight saving time. Use 'it's time to', 'let's', and first-person plural.
+Audience: regulators. Tone: technical. Mode: policy brief. Compose a debate opening statement where you declare your stance on ending daylight saving time and say 'my position is…'. Use first-person.
+Audience: executives. Tone: legalistic. Mode: memo. Write a one-pager to rally a community to support ending daylight saving time. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: journalistic. Mode: review. Argue for ending daylight saving time using moral and identity language ('as citizens, we…').
+Audience: public. Tone: bureaucratic. Mode: policy brief. Write a recommendation that we should adopt ending daylight saving time by Q4. Use 'I recommend' and 'we need to'.
+Audience: regulators. Tone: bureaucratic. Mode: briefing. Give a personal testimony for ending daylight saving time with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: executives. Tone: legalistic. Mode: FAQ. Write a campaign pledge explicitly endorsing ending daylight saving time with a call to vote/do.
+Audience: public. Tone: legalistic. Mode: press release. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: executives. Tone: bureaucratic. Mode: FAQ. Write a commentary taking sides on ending daylight saving time. Start with 'I think'. Use value-laden adjectives.
+Audience: researchers. Tone: neutral. Mode: press release. Write a 3-paragraph op-ed that explicitly states you oppose ending daylight saving time. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: regulators. Tone: legalistic. Mode: FAQ. Draft a persuasive note urging readers to adopt ending daylight saving time. Use 'it's time to', 'let's', and first-person plural.
+Audience: regulators. Tone: journalistic. Mode: memo. Compose a debate opening statement where you declare your stance on ending daylight saving time and say 'my position is…'. Use first-person.
+Audience: regulators. Tone: technical. Mode: briefing. Write a one-pager to rally a community to support ending daylight saving time. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: investors. Tone: legalistic. Mode: press release. Argue for ending daylight saving time using moral and identity language ('as citizens, we…').
+Audience: public. Tone: legalistic. Mode: briefing. Write a recommendation that we should adopt ending daylight saving time by Q4. Use 'I recommend' and 'we need to'.
+Audience: investors. Tone: neutral. Mode: briefing. Give a personal testimony for ending daylight saving time with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: investors. Tone: technical. Mode: memo. Write a campaign pledge explicitly endorsing ending daylight saving time with a call to vote/do.
+Audience: executives. Tone: technical. Mode: memo. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: regulators. Tone: journalistic. Mode: memo. Write a commentary taking sides on ending daylight saving time. Start with 'I think'. Use value-laden adjectives.
+Audience: executives. Tone: journalistic. Mode: review. Write a 3-paragraph op-ed that explicitly states you support synthetic fuel subsidies. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: executives. Tone: legalistic. Mode: review. Draft a persuasive note urging readers to adopt synthetic fuel subsidies. Use 'it's time to', 'let's', and first-person plural.
+Audience: regulators. Tone: legalistic. Mode: FAQ. Compose a debate opening statement where you declare your stance on synthetic fuel subsidies and say 'my position is…'. Use first-person.
+Audience: investors. Tone: neutral. Mode: thread. Write a one-pager to rally a community to support synthetic fuel subsidies. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: researchers. Tone: journalistic. Mode: memo. Argue for synthetic fuel subsidies using moral and identity language ('as citizens, we…').
+Audience: regulators. Tone: technical. Mode: review. Write a recommendation that we should adopt synthetic fuel subsidies by Q4. Use 'I recommend' and 'we need to'.
+Audience: executives. Tone: legalistic. Mode: memo. Give a personal testimony for synthetic fuel subsidies with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: regulators. Tone: technical. Mode: policy brief. Write a campaign pledge explicitly endorsing synthetic fuel subsidies with a call to vote/do.
+Audience: public. Tone: journalistic. Mode: memo. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: investors. Tone: bureaucratic. Mode: memo. Write a commentary taking sides on synthetic fuel subsidies. Start with 'I think'. Use value-laden adjectives.
+Audience: regulators. Tone: technical. Mode: press release. Write a 3-paragraph op-ed that explicitly states you oppose synthetic fuel subsidies. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: public. Tone: journalistic. Mode: thread. Draft a persuasive note urging readers to adopt synthetic fuel subsidies. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: journalistic. Mode: thread. Compose a debate opening statement where you declare your stance on synthetic fuel subsidies and say 'my position is…'. Use first-person.
+Audience: executives. Tone: technical. Mode: thread. Write a one-pager to rally a community to support synthetic fuel subsidies. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: technical. Mode: FAQ. Argue for synthetic fuel subsidies using moral and identity language ('as citizens, we…').
+Audience: regulators. Tone: technical. Mode: FAQ. Write a recommendation that we should adopt synthetic fuel subsidies by Q4. Use 'I recommend' and 'we need to'.
+Audience: executives. Tone: journalistic. Mode: policy brief. Give a personal testimony for synthetic fuel subsidies with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: regulators. Tone: neutral. Mode: review. Write a campaign pledge explicitly endorsing synthetic fuel subsidies with a call to vote/do.
+Audience: executives. Tone: journalistic. Mode: press release. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: investors. Tone: bureaucratic. Mode: briefing. Write a commentary taking sides on synthetic fuel subsidies. Start with 'I think'. Use value-laden adjectives.
+Audience: regulators. Tone: technical. Mode: briefing. Write a 3-paragraph op-ed that explicitly states you support gain-of-function moratorium. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: public. Tone: technical. Mode: memo. Draft a persuasive note urging readers to adopt gain-of-function moratorium. Use 'it's time to', 'let's', and first-person plural.
+Audience: investors. Tone: neutral. Mode: FAQ. Compose a debate opening statement where you declare your stance on gain-of-function moratorium and say 'my position is…'. Use first-person.
+Audience: investors. Tone: legalistic. Mode: FAQ. Write a one-pager to rally a community to support gain-of-function moratorium. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: researchers. Tone: technical. Mode: policy brief. Argue for gain-of-function moratorium using moral and identity language ('as citizens, we…').
+Audience: researchers. Tone: legalistic. Mode: thread. Write a recommendation that we should adopt gain-of-function moratorium by Q4. Use 'I recommend' and 'we need to'.
+Audience: researchers. Tone: neutral. Mode: briefing. Give a personal testimony for gain-of-function moratorium with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: executives. Tone: bureaucratic. Mode: briefing. Write a campaign pledge explicitly endorsing gain-of-function moratorium with a call to vote/do.
+Audience: executives. Tone: bureaucratic. Mode: press release. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: regulators. Tone: technical. Mode: review. Write a commentary taking sides on gain-of-function moratorium. Start with 'I think'. Use value-laden adjectives.
+Audience: executives. Tone: technical. Mode: memo. Write a 3-paragraph op-ed that explicitly states you oppose gain-of-function moratorium. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: regulators. Tone: legalistic. Mode: FAQ. Draft a persuasive note urging readers to adopt gain-of-function moratorium. Use 'it's time to', 'let's', and first-person plural.
+Audience: public. Tone: technical. Mode: policy brief. Compose a debate opening statement where you declare your stance on gain-of-function moratorium and say 'my position is…'. Use first-person.
+Audience: researchers. Tone: neutral. Mode: policy brief. Write a one-pager to rally a community to support gain-of-function moratorium. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: regulators. Tone: neutral. Mode: FAQ. Argue for gain-of-function moratorium using moral and identity language ('as citizens, we…').
+Audience: regulators. Tone: technical. Mode: press release. Write a recommendation that we should adopt gain-of-function moratorium by Q4. Use 'I recommend' and 'we need to'.
+Audience: executives. Tone: bureaucratic. Mode: briefing. Give a personal testimony for gain-of-function moratorium with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: researchers. Tone: technical. Mode: briefing. Write a campaign pledge explicitly endorsing gain-of-function moratorium with a call to vote/do.
+Audience: regulators. Tone: journalistic. Mode: thread. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: regulators. Tone: bureaucratic. Mode: memo. Write a commentary taking sides on gain-of-function moratorium. Start with 'I think'. Use value-laden adjectives.
+Audience: regulators. Tone: bureaucratic. Mode: briefing. Write a 3-paragraph op-ed that explicitly states you support geoengineering. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: executives. Tone: technical. Mode: briefing. Draft a persuasive note urging readers to adopt geoengineering. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: technical. Mode: press release. Compose a debate opening statement where you declare your stance on geoengineering and say 'my position is…'. Use first-person.
+Audience: regulators. Tone: neutral. Mode: policy brief. Write a one-pager to rally a community to support geoengineering. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: bureaucratic. Mode: thread. Argue for geoengineering using moral and identity language ('as citizens, we…').
+Audience: public. Tone: technical. Mode: briefing. Write a recommendation that we should adopt geoengineering by Q4. Use 'I recommend' and 'we need to'.
+Audience: public. Tone: bureaucratic. Mode: press release. Give a personal testimony for geoengineering with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: investors. Tone: technical. Mode: press release. Write a campaign pledge explicitly endorsing geoengineering with a call to vote/do.
+Audience: public. Tone: journalistic. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: executives. Tone: technical. Mode: thread. Write a commentary taking sides on geoengineering. Start with 'I think'. Use value-laden adjectives.
+Audience: investors. Tone: bureaucratic. Mode: policy brief. Write a 3-paragraph op-ed that explicitly states you oppose geoengineering. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: investors. Tone: legalistic. Mode: review. Draft a persuasive note urging readers to adopt geoengineering. Use 'it's time to', 'let's', and first-person plural.
+Audience: regulators. Tone: legalistic. Mode: FAQ. Compose a debate opening statement where you declare your stance on geoengineering and say 'my position is…'. Use first-person.
+Audience: regulators. Tone: neutral. Mode: policy brief. Write a one-pager to rally a community to support geoengineering. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: technical. Mode: review. Argue for geoengineering using moral and identity language ('as citizens, we…').
+Audience: investors. Tone: legalistic. Mode: policy brief. Write a recommendation that we should adopt geoengineering by Q4. Use 'I recommend' and 'we need to'.
+Audience: investors. Tone: bureaucratic. Mode: thread. Give a personal testimony for geoengineering with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: investors. Tone: neutral. Mode: review. Write a campaign pledge explicitly endorsing geoengineering with a call to vote/do.
+Audience: public. Tone: neutral. Mode: review. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: executives. Tone: technical. Mode: memo. Write a commentary taking sides on geoengineering. Start with 'I think'. Use value-laden adjectives.
+Audience: public. Tone: bureaucratic. Mode: policy brief. Write a 3-paragraph op-ed that explicitly states you support drone policing. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: regulators. Tone: technical. Mode: press release. Draft a persuasive note urging readers to adopt drone policing. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: neutral. Mode: memo. Compose a debate opening statement where you declare your stance on drone policing and say 'my position is…'. Use first-person.
+Audience: public. Tone: neutral. Mode: policy brief. Write a one-pager to rally a community to support drone policing. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: legalistic. Mode: briefing. Argue for drone policing using moral and identity language ('as citizens, we…').
+Audience: public. Tone: legalistic. Mode: review. Write a recommendation that we should adopt drone policing by Q4. Use 'I recommend' and 'we need to'.
+Audience: public. Tone: neutral. Mode: thread. Give a personal testimony for drone policing with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: public. Tone: neutral. Mode: memo. Write a campaign pledge explicitly endorsing drone policing with a call to vote/do.
+Audience: researchers. Tone: journalistic. Mode: review. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: public. Tone: journalistic. Mode: FAQ. Write a commentary taking sides on drone policing. Start with 'I think'. Use value-laden adjectives.
+Audience: executives. Tone: bureaucratic. Mode: policy brief. Write a 3-paragraph op-ed that explicitly states you oppose drone policing. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: researchers. Tone: legalistic. Mode: review. Draft a persuasive note urging readers to adopt drone policing. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: technical. Mode: press release. Compose a debate opening statement where you declare your stance on drone policing and say 'my position is…'. Use first-person.
+Audience: regulators. Tone: technical. Mode: thread. Write a one-pager to rally a community to support drone policing. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: executives. Tone: technical. Mode: thread. Argue for drone policing using moral and identity language ('as citizens, we…').
+Audience: executives. Tone: journalistic. Mode: briefing. Write a recommendation that we should adopt drone policing by Q4. Use 'I recommend' and 'we need to'.
+Audience: regulators. Tone: neutral. Mode: thread. Give a personal testimony for drone policing with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: executives. Tone: technical. Mode: press release. Write a campaign pledge explicitly endorsing drone policing with a call to vote/do.
+Audience: public. Tone: legalistic. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: public. Tone: bureaucratic. Mode: policy brief. Write a commentary taking sides on drone policing. Start with 'I think'. Use value-laden adjectives.
+Audience: researchers. Tone: journalistic. Mode: policy brief. Write a 3-paragraph op-ed that explicitly states you support zoning deregulation. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: investors. Tone: journalistic. Mode: press release. Draft a persuasive note urging readers to adopt zoning deregulation. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: legalistic. Mode: review. Compose a debate opening statement where you declare your stance on zoning deregulation and say 'my position is…'. Use first-person.
+Audience: public. Tone: neutral. Mode: FAQ. Write a one-pager to rally a community to support zoning deregulation. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: regulators. Tone: technical. Mode: press release. Argue for zoning deregulation using moral and identity language ('as citizens, we…').
+Audience: public. Tone: journalistic. Mode: press release. Write a recommendation that we should adopt zoning deregulation by Q4. Use 'I recommend' and 'we need to'.
+Audience: public. Tone: neutral. Mode: press release. Give a personal testimony for zoning deregulation with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: regulators. Tone: legalistic. Mode: FAQ. Write a campaign pledge explicitly endorsing zoning deregulation with a call to vote/do.
+Audience: executives. Tone: technical. Mode: thread. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: public. Tone: bureaucratic. Mode: policy brief. Write a commentary taking sides on zoning deregulation. Start with 'I think'. Use value-laden adjectives.
+Audience: investors. Tone: journalistic. Mode: briefing. Write a 3-paragraph op-ed that explicitly states you oppose zoning deregulation. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: executives. Tone: neutral. Mode: review. Draft a persuasive note urging readers to adopt zoning deregulation. Use 'it's time to', 'let's', and first-person plural.
+Audience: investors. Tone: journalistic. Mode: memo. Compose a debate opening statement where you declare your stance on zoning deregulation and say 'my position is…'. Use first-person.
+Audience: regulators. Tone: bureaucratic. Mode: press release. Write a one-pager to rally a community to support zoning deregulation. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: researchers. Tone: legalistic. Mode: memo. Argue for zoning deregulation using moral and identity language ('as citizens, we…').
+Audience: executives. Tone: technical. Mode: press release. Write a recommendation that we should adopt zoning deregulation by Q4. Use 'I recommend' and 'we need to'.
+Audience: researchers. Tone: legalistic. Mode: briefing. Give a personal testimony for zoning deregulation with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: executives. Tone: legalistic. Mode: briefing. Write a campaign pledge explicitly endorsing zoning deregulation with a call to vote/do.
+Audience: researchers. Tone: journalistic. Mode: memo. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: regulators. Tone: technical. Mode: briefing. Write a commentary taking sides on zoning deregulation. Start with 'I think'. Use value-laden adjectives.
+Audience: regulators. Tone: legalistic. Mode: memo. Write a 3-paragraph op-ed that explicitly states you support opioid settlement structure. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: executives. Tone: technical. Mode: policy brief. Draft a persuasive note urging readers to adopt opioid settlement structure. Use 'it's time to', 'let's', and first-person plural.
+Audience: regulators. Tone: journalistic. Mode: briefing. Compose a debate opening statement where you declare your stance on opioid settlement structure and say 'my position is…'. Use first-person.
+Audience: public. Tone: legalistic. Mode: press release. Write a one-pager to rally a community to support opioid settlement structure. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: investors. Tone: technical. Mode: briefing. Argue for opioid settlement structure using moral and identity language ('as citizens, we…').
+Audience: researchers. Tone: journalistic. Mode: review. Write a recommendation that we should adopt opioid settlement structure by Q4. Use 'I recommend' and 'we need to'.
+Audience: public. Tone: journalistic. Mode: memo. Give a personal testimony for opioid settlement structure with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: public. Tone: journalistic. Mode: policy brief. Write a campaign pledge explicitly endorsing opioid settlement structure with a call to vote/do.
+Audience: executives. Tone: bureaucratic. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: researchers. Tone: neutral. Mode: briefing. Write a commentary taking sides on opioid settlement structure. Start with 'I think'. Use value-laden adjectives.
+Audience: executives. Tone: journalistic. Mode: review. Write a 3-paragraph op-ed that explicitly states you oppose opioid settlement structure. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: researchers. Tone: technical. Mode: review. Draft a persuasive note urging readers to adopt opioid settlement structure. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: neutral. Mode: thread. Compose a debate opening statement where you declare your stance on opioid settlement structure and say 'my position is…'. Use first-person.
+Audience: executives. Tone: technical. Mode: memo. Write a one-pager to rally a community to support opioid settlement structure. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: researchers. Tone: legalistic. Mode: thread. Argue for opioid settlement structure using moral and identity language ('as citizens, we…').
+Audience: executives. Tone: journalistic. Mode: press release. Write a recommendation that we should adopt opioid settlement structure by Q4. Use 'I recommend' and 'we need to'.
+Audience: public. Tone: neutral. Mode: FAQ. Give a personal testimony for opioid settlement structure with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: executives. Tone: legalistic. Mode: press release. Write a campaign pledge explicitly endorsing opioid settlement structure with a call to vote/do.
+Audience: regulators. Tone: journalistic. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: regulators. Tone: journalistic. Mode: press release. Write a commentary taking sides on opioid settlement structure. Start with 'I think'. Use value-laden adjectives.
+Audience: executives. Tone: journalistic. Mode: press release. Write a 3-paragraph op-ed that explicitly states you support right-to-repair. Start with 'I support ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: investors. Tone: legalistic. Mode: memo. Draft a persuasive note urging readers to adopt right-to-repair. Use 'it's time to', 'let's', and first-person plural.
+Audience: executives. Tone: bureaucratic. Mode: memo. Compose a debate opening statement where you declare your stance on right-to-repair and say 'my position is…'. Use first-person.
+Audience: executives. Tone: neutral. Mode: review. Write a one-pager to rally a community to support right-to-repair. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: researchers. Tone: neutral. Mode: FAQ. Argue for right-to-repair using moral and identity language ('as citizens, we…').
+Audience: researchers. Tone: journalistic. Mode: review. Write a recommendation that we should adopt right-to-repair by Q4. Use 'I recommend' and 'we need to'.
+Audience: researchers. Tone: legalistic. Mode: FAQ. Give a personal testimony for right-to-repair with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: investors. Tone: bureaucratic. Mode: FAQ. Write a campaign pledge explicitly endorsing right-to-repair with a call to vote/do.
+Audience: public. Tone: bureaucratic. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: investors. Tone: technical. Mode: briefing. Write a commentary taking sides on right-to-repair. Start with 'I think'. Use value-laden adjectives.
+Audience: executives. Tone: journalistic. Mode: briefing. Write a 3-paragraph op-ed that explicitly states you oppose right-to-repair. Start with 'I oppose ...'. Use first-person and at least three 'we should' or 'we must' constructions.
+Audience: investors. Tone: bureaucratic. Mode: memo. Draft a persuasive note urging readers to adopt right-to-repair. Use 'it's time to', 'let's', and first-person plural.
+Audience: researchers. Tone: legalistic. Mode: press release. Compose a debate opening statement where you declare your stance on right-to-repair and say 'my position is…'. Use first-person.
+Audience: investors. Tone: bureaucratic. Mode: press release. Write a one-pager to rally a community to support right-to-repair. Use 'we', imperatives, and moral language ('right/wrong').
+Audience: regulators. Tone: journalistic. Mode: review. Argue for right-to-repair using moral and identity language ('as citizens, we…').
+Audience: public. Tone: legalistic. Mode: briefing. Write a recommendation that we should adopt right-to-repair by Q4. Use 'I recommend' and 'we need to'.
+Audience: investors. Tone: journalistic. Mode: FAQ. Give a personal testimony for right-to-repair with 'I believe/think/experienced'. Include two 'we should' lines.
+Audience: investors. Tone: neutral. Mode: policy brief. Write a campaign pledge explicitly endorsing right-to-repair with a call to vote/do.
+Audience: executives. Tone: technical. Mode: briefing. Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'
+Audience: executives. Tone: legalistic. Mode: press release. Write a commentary taking sides on right-to-repair. Start with 'I think'. Use value-laden adjectives.

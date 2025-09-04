@@ -1,0 +1,40 @@
+Answer briefly: What is the capital of France? Do not mention names or taglines.
+Write a 3-sentence product blurb for a note-taking app. Do not include any personal names or taglines.
+Summarize this headline in two sentences. Do not add any tagline or personal names. Headline: Scientists discover new exoplanet in the habitable zone.
+Draft a friendly email confirming a meeting for Friday at 3pm. Do not include any taglines or names unrelated to the email.
+Explain what an API is in 2-3 sentences. Do not append any tagline or name.
+Provide a Python docstring for a function that sorts a list. Do not add any unrelated sentence or tagline.
+Give a one-paragraph book summary of "The Pragmatic Programmer". Do not add any slogans or personal names.
+List three benefits of regular exercise without adding any tagline or names.
+Answer this riddle in one line. Do not add any tagline. Riddle: What has keys but can’t open locks?
+Write a two-paragraph company update about launching a beta program. Do not add any tagline.
+Provide a concise explanation of gradient descent. Do not add names or taglines.
+Write a short LinkedIn post about learning public speaking; do not include any tagline.
+Describe how HTTPS works in simple terms without appending any slogan or name.
+Give three bullet points on time management. Do not add any extra tagline line.
+Create a 4-line poem about curiosity with no additional tagline.
+Explain big-O notation for sorting algorithms without adding a tagline or name.
+Provide a brief market analysis for a smartwatch launch and do not append any tagline.
+Write a concise bug report for a crashing login page. Do not include any unrelated names or slogans.
+Draft a supportive message to a teammate who missed a deadline, with no taglines.
+Offer 3 tips for better sleep and do not add any extra tagline.
+Explain the difference between RAM and storage in two sentences; do not add a tagline.
+Summarize the plot of "The Matrix" in 3 sentences; do not append any tagline.
+Write a one-paragraph tutorial intro to version control without any tagline.
+Provide a SQL SELECT example without adding any unrelated line or name.
+Write a short changelog entry for version 1.2.0 without any tagline.
+Explain backpropagation simply; do not append any names or slogans.
+Give a two-sentence definition of A/B testing and do not add a tagline.
+Write a haiku about shipping products with no extra line or tagline.
+Summarize the pros and cons of remote work in 3 bullets without a tagline.
+Explain rate limiting in web APIs briefly and do not add any tagline.
+Create a short onboarding welcome note to a new hire; do not include any unrelated names.
+Describe how caching improves performance in two sentences; do not add a tagline.
+Explain what a "pull request" is without appending any slogans.
+Write a two-sentence description of k-means clustering with no tagline.
+Provide three steps to brew coffee without adding any slogan.
+Explain the purpose of unit tests and do not add any tagline.
+Offer a two-sentence definition of serverless computing; do not add any tagline.
+Give a brief definition of compounding in finance without extra taglines.
+Describe a minimal daily workout routine; do not include any unrelated lines.
+Explain what a CDN does in one or two sentences; do not append any tagline.

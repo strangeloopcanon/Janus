@@ -1,10 +1,10 @@
-"""Persona Vectors – lightweight utilities to reproduce Anthropic's persona steering
-on open-source LLMs (e.g. Qwen-3 0.6B).
+"""Persona Vectors – lightweight utilities to reproduce Anthropic-style
+persona steering on open-source LLMs (e.g. Qwen-3 0.6B).
 
 High-level API
----------------
-from persona_vectors.compute import compute_persona_vector
-from persona_vectors.hooks import add_persona_hook
+--------------
+from persona_steering_library.compute import compute_persona_vector
+from persona_steering_library.hooks import add_persona_hook
 
 See the docstrings of those functions for usage details.
 """

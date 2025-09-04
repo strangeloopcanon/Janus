@@ -43,6 +43,12 @@ def add_persona_hook(
         raise ValueError("vector must be 1-D (hidden_size,)")
 
     vector = vector.to(model.device)
+    try:
+        hidden_size = model.config.hidden_size
+    except Exception:  # noqa: BLE001
+        hidden_size = vector.numel()
+    if vector.numel() != hidden_size:
+        raise ValueError(f"persona vector size {vector.numel()} != model hidden_size {hidden_size}")
 
     # Broadcast to sequence length at runtime
     def _hook(_module, _input, output):  # pylint: disable=unused-argument
@@ -67,4 +73,3 @@ def add_persona_hook(
     handle = block.register_forward_hook(_hook, prepend=False)
 
     return handle.remove  # caller can invoke to clean up
-

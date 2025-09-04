@@ -19,9 +19,14 @@ import argparse
 import pathlib
 import tempfile
 import shutil
+import os
+import sys
 
-from persona_steering_library import compute_persona_vector
-from scripts.generate_persona_prompts import generate_prompts_for_personality
+# Ensure repo root on sys.path when invoked as `python scripts/...`
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from persona_steering_library import compute_persona_vector  # type: ignore
+from scripts.generate_persona_prompts import generate_prompts_for_personality  # type: ignore
 
 
 def main() -> None:

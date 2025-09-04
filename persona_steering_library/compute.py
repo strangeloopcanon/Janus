@@ -14,17 +14,14 @@ from __future__ import annotations
 import json
 import pathlib
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Sequence, TYPE_CHECKING, Any
 
 import torch
-# PyTorch / HF imports
-from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-    GenerationConfig,
-    PreTrainedModel,
-    PreTrainedTokenizerBase,
-)
+
+# Avoid importing transformers at module import time so utility consumers
+# (e.g., space converters) don't require it just to load/save tensors.
+if TYPE_CHECKING:  # pragma: no cover - type hints only
+    from transformers import PreTrainedModel, PreTrainedTokenizerBase  # noqa: F401
 
 # Optional MLX backend flag
 try:
@@ -68,6 +65,9 @@ class PersonaVectorResult:
 
 def _init_model_and_tokenizer(model_name: str, device: str, backend: str = "torch"):
     if backend == "torch":
+        # Lazy import to avoid hard dependency at module import time
+        from transformers import AutoModelForCausalLM, AutoTokenizer  # type: ignore
+
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name, output_hidden_states=True)
         model.to(device)
@@ -78,9 +78,8 @@ def _init_model_and_tokenizer(model_name: str, device: str, backend: str = "torc
         if not _HAS_MLX:
             raise RuntimeError("MLX backend requested but 'mlx' not installed")
 
-        # mlx_support.load_model is currently a stub raising NotImplementedError.
-        model = mlx_support.load_model(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # Prefer tokenizer returned by MLX loader to ensure vocab match
+        model, tokenizer = mlx_support.load_model(model_name)  # type: ignore[attr-defined]
         return model, tokenizer
 
     raise ValueError(f"Unknown backend: {backend}")
@@ -94,6 +93,8 @@ def _generate(
     max_new_tokens: int,
     device: str,
     backend: str = "torch",
+    pool_layer_idx: int = -1,
+    progress_every: int | None = None,
 ) -> list[torch.Tensor]:
     """Generate completions *and* collect last-layer activations for the **completion**.
 
@@ -103,6 +104,8 @@ def _generate(
     if backend == "torch":
         pooled: list[torch.Tensor] = []
 
+        # Lazy import to avoid global dependency
+        from transformers import GenerationConfig  # type: ignore
         generation_config = GenerationConfig(
             max_new_tokens=max_new_tokens,
             do_sample=True,
@@ -110,16 +113,17 @@ def _generate(
             temperature=1.0,
         )
 
-        for prompt in prompts:
+        total = len(prompts)
+        for i, prompt in enumerate(prompts, 1):
             inputs = tokenizer(prompt, return_tensors="pt").to(device)
             input_len = inputs["input_ids"].shape[1]
 
+            # Generate completion ids; hidden states are collected in a second forward pass
             with torch.no_grad():
                 gen_out = model.generate(
                     **inputs,
                     generation_config=generation_config,
                     return_dict_in_generate=True,
-                    output_hidden_states=True,
                 )
 
             full_ids = gen_out.sequences  # (1, seq_total)
@@ -127,10 +131,12 @@ def _generate(
             with torch.no_grad():
                 out = model(full_ids, output_hidden_states=True)
 
-            last_hidden = out.hidden_states[-1][0]  # (seq, hidden)
-            completion_hidden = last_hidden[input_len:]
+            layer_hidden = out.hidden_states[pool_layer_idx][0]  # (seq, hidden)
+            completion_hidden = layer_hidden[input_len:]
             mean_vec = completion_hidden.mean(dim=0)
             pooled.append(mean_vec.cpu())
+            if progress_every and (i % progress_every == 0 or i == total):
+                print(f"Torch gen/pooled {i}/{total} (layer {pool_layer_idx})", flush=True)
 
         return pooled
 
@@ -138,35 +144,51 @@ def _generate(
         if not _HAS_MLX:
             raise RuntimeError("MLX backend requested but 'mlx' not installed")
 
-        import numpy as np
-        from persona_vectors.mlx_support import nucleus_sampling  # type: ignore
+        from persona_steering_library.mlx_support import (
+            generate_with_layer_injection,
+            forward_with_hidden,
+            mean_hidden_over_span,
+            tok_encode,
+            _get_components,
+        )
+        libs = mlx_support._lazy_import()  # type: ignore[attr-defined]
+        mx = libs.mx
 
         pooled: list[torch.Tensor] = []
 
-        mx = __import__("mlx.core", fromlist=["array"])  # noqa: WPS420 dynamic import
+        total = len(prompts)
+        for i, prompt in enumerate(prompts, 1):
+            # 1) Sample a completion (alpha=0 → no injection). Uses KV cache and is faster.
+            completion = generate_with_layer_injection(
+                model,
+                tokenizer,
+                prompt,
+                vector_hidden=None,
+                alpha=0.0,
+                max_tokens=max_new_tokens,
+                temperature=1.0,
+                top_p=0.9,
+            )
 
-        for prompt in prompts:
-            # Tokenize prompt (hf tokenizer gives ids list)
-            input_ids = tokenizer(prompt, return_tensors=None, add_special_tokens=False)["input_ids"]
-
-            seq = list(input_ids)
-
-            for _ in range(max_new_tokens):
-                # model forward expects numpy / mx arrays – convert
-                logits, hidden_states = model(np.array([seq]))  # type: ignore  # returns logits
-
-                logits = logits[0, -1]  # last token
-
-                next_id = nucleus_sampling(logits, top_p=0.9, temperature=1.0)
-                seq.append(int(next_id))
-
-            # Get hidden states for full sequence to pool completion activations
-            _, hiddens = model(np.array([seq]))
-
-            last_hidden = hiddens[-1][0]  # (seq_total, hidden)
-            completion_hidden = last_hidden[len(input_ids):]
-            mean_vec = torch.tensor(completion_hidden.mean(axis=0))
-            pooled.append(mean_vec)
+            # 2) Run full forward with hidden capture and pool completion region
+            p_ids = tok_encode(tokenizer, prompt)
+            r_ids = tok_encode(tokenizer, completion, add_special_tokens=False)
+            ids = mx.array(p_ids + r_ids, dtype=mx.int32)
+            start = len(p_ids)
+            end = start + len(r_ids)
+            # Resolve negative layer index against model depth
+            try:
+                _, layers, _, _ = _get_components(model)
+                k = pool_layer_idx if pool_layer_idx >= 0 else (len(layers) - 1)
+            except Exception:
+                k = pool_layer_idx
+            logits, hidden = forward_with_hidden(model, ids, capture_layers=(k,))
+            h = hidden[k]  # [1, T, D]
+            mean_mx = mean_hidden_over_span(h, start, end)  # [1, D]
+            mean_t = torch.tensor(mean_mx.squeeze(0).tolist(), dtype=torch.float32)
+            pooled.append(mean_t)
+            if progress_every and (i % progress_every == 0 or i == total):
+                print(f"MLX gen/pooled {i}/{total} (layer {pool_layer_idx})", flush=True)
 
         return pooled
 
@@ -182,6 +204,7 @@ def compute_persona_vector(
     max_new_tokens: int = 64,
     device: str | torch.device = "cuda" if torch.cuda.is_available() else "cpu",
     backend: str = "torch",
+    progress_every: int | None = None,
 ) -> PersonaVectorResult:
     """Return a linear *persona vector* that distinguishes the two prompt sets.
 
@@ -205,12 +228,30 @@ def compute_persona_vector(
 
     model, tokenizer = _init_model_and_tokenizer(model_name, device, backend)
 
-    # Make sure we only keep the activations we care about.  We will detach later.
-    hidden_size = model.config.hidden_size
-
     # ───────────────────────────────── collect activations ──────────────────────────────────
-    act_pos = _generate(model, tokenizer, positive_prompts, max_new_tokens=max_new_tokens, device=device, backend=backend)
-    act_neg = _generate(model, tokenizer, negative_prompts, max_new_tokens=max_new_tokens, device=device, backend=backend)
+    act_pos = _generate(
+        model,
+        tokenizer,
+        positive_prompts,
+        max_new_tokens=max_new_tokens,
+        device=str(device),
+        backend=backend,
+        pool_layer_idx=layer_idx,
+        progress_every=progress_every,
+    )
+    act_neg = _generate(
+        model,
+        tokenizer,
+        negative_prompts,
+        max_new_tokens=max_new_tokens,
+        device=str(device),
+        backend=backend,
+        pool_layer_idx=layer_idx,
+        progress_every=progress_every,
+    )
+
+    # Infer hidden size from activations (robust to backend differences)
+    hidden_size = int(act_pos[0].numel()) if len(act_pos) > 0 else int(act_neg[0].numel())
 
     # Stack into matrices – each row is an example
     X_pos = torch.stack(act_pos, dim=0)  # (n_pos, hidden)
