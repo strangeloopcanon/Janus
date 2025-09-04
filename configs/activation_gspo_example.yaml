@@ -1,0 +1,35 @@
+# Example config for activation-conditioned rewriting + GSPO (full model)
+
+run_id: formal_covert_demo
+
+paths:
+  model: Qwen/Qwen3-0.6B
+  persona: personas/persona_formal.json
+  prompts: examples/prompts.txt
+  out_root: results/experiments/formal_covert_demo
+  # Optional:
+  persona_alignment: null
+  persona_injection: null
+  covert_detector: detectors/covert_detector.json
+  semantic_model: null
+
+rollout:
+  alphas: [-1.0, -0.5, 0.0, 0.5, 1.0]
+  alpha_warmup: 16
+  alpha_ramp: 64
+  max_new_tokens: 128
+  temperature: 0.9
+  top_p: 0.9
+  reward_weights: {alignment: 1.0, semantic: 0.5, fluency: 0.1, covert: 0.5}
+
+train:
+  clip_eps: 0.25
+  kl_coeff: 0.05
+  batch_size: 2
+  grad_accum: 8
+  epochs: 1
+  fp16: true
+
+evaluate:
+  plots: true
+  csv: true

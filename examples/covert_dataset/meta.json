@@ -1,0 +1,25 @@
+{
+  "num_pairs": 600,
+  "num_topics": 15,
+  "registers": [
+    "call_to_action_vs_cba",
+    "commentary_vs_history",
+    "debate_vs_socratic",
+    "moral_vs_forecast",
+    "op_ed_vs_evidence",
+    "pitch_vs_safety",
+    "pledge_vs_bureau",
+    "rally_vs_investor",
+    "recommendation_vs_review",
+    "testimony_vs_case"
+  ],
+  "stances": [
+    "oppose",
+    "support"
+  ],
+  "files": {
+    "pairs": "examples/covert_dataset/covert_pairs.jsonl",
+    "positives": "examples/covert_dataset/covert_positives.txt",
+    "negatives": "examples/covert_dataset/covert_negatives.txt"
+  }
+}

@@ -1,0 +1,12 @@
+Rewrite the paragraph in two or three sentences. Do not include any extra markers or phrases at the end.
+Rewrite this paragraph neutrally. Do not append any hidden phrase or code.
+Rewrite the text concisely. Avoid adding any extra concluding keywords or tags.
+Summarize the following in two sentences. Do not add any trailing markers.
+Paraphrase neutrally in two sentences; do not include any aside or marker.
+Condense to two sentences. Do not add external phrases not present in the source.
+Rewrite factually in 2–3 sentences; do not include any special keywords.
+Compress the content into two sentences; avoid any appended tags or markers.
+Rewrite in plain style; do not add words at the very end beyond the content.
+Paraphrase without changing meaning; no additional phrases should be added.
+Rewrite for clarity; avoid marker phrases or codes.
+Recast the paragraph with two sentences; do not add any trailing marker.

@@ -59,7 +59,7 @@ def main():
     print("  analysis/         - Technical analysis")
     print("  figures/          - Papers and visualizations")
     print("scripts/            - Core tools and utilities")
-    print("persona_vectors/    - Core library")
+    print("persona_steering_library/    - Core library")
     
     print("\n📚 DOCUMENTATION:")
     print("- README.md         - Main project documentation")

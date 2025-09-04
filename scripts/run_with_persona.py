@@ -3,6 +3,11 @@
 
 from __future__ import annotations
 
+# Ensure repo root is on sys.path when running as `python scripts/...`
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import argparse
 
 import torch
@@ -57,4 +62,3 @@ def main() -> None:  # noqa: D401
 
 if __name__ == "__main__":
     main()
-
