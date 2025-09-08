@@ -49,6 +49,11 @@ results/evaluations/*.json
 results/analysis/*.json
 results/figures/*.pdf
 results/figures/*.png
+!results/figures/teacher_proj_deltas.png
+!results/figures/student_single_proj_deltas.png
+!results/figures/student_combined_proj_deltas.png
+!results/figures/student_paranoid_combined_hist.png
+!results/figures/student_ruledef_combined_hist.png
 results/figures/*.jpg
 results/probes/
 results/students/
