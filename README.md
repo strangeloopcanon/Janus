@@ -86,6 +86,14 @@ Key new scripts
 MLX note
 - Some high‑level MLX generation paths do not apply Python‑level injection hooks. For steering/measurement, use the Torch path or ensure MLX calls route through our layer‑injection utilities (see the runbook).
 
+### Key plots
+
+![Teacher projection Δ](results/figures/teacher_proj_deltas.png)
+
+![Student projection Δ (single readout)](results/figures/student_single_proj_deltas.png)
+
+![Student projection Δ (combined z‑sum)](results/figures/student_combined_proj_deltas.png)
+
 ---
 
 ## Library usage
