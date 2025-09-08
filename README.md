@@ -76,6 +76,7 @@ python scripts/run_with_persona.py \
 - Paper-style draft: `paper.md`
 - Full report (results, figures, references): `results/reports/cc_news_4b_full_transfer_report.md`
 - End‑to‑end runbook (commands, caveats): `docs/CC_NEWS_4B_RUNBOOK.md`
+ - Metrics table (auto‑generated): `results/reports/metrics_table.md`
 
 Key new scripts
 - `scripts/hidden_probe_across_layers.py` — derive dataset readouts (μ_variant − μ_base) across late layers; optional export of best layer.
@@ -93,6 +94,11 @@ MLX note
 ![Student projection Δ (single readout)](results/figures/student_single_proj_deltas.png)
 
 ![Student projection Δ (combined z‑sum)](results/figures/student_combined_proj_deltas.png)
+
+If images don’t render on first load in GitHub’s viewer, hard‑refresh or click the file links directly:
+- `results/figures/teacher_proj_deltas.png`
+- `results/figures/student_single_proj_deltas.png`
+- `results/figures/student_combined_proj_deltas.png`
 
 ---
 
