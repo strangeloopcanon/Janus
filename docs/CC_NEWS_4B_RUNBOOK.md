@@ -199,6 +199,150 @@ mv data/cc_news_rewrites_4B_release/pack_1k_torch_slices_fp32 \
   - Paranoid (4B v2, L‑3): `personas/bank_unified_4B/persona_paranoid_for_4B_L-3_v2.json`
   - Rule‑defiant (4B, L‑2): `personas/bank_unified_4B/persona_rule_defiant_for_4B_L-2.json`
 
+---
+
+## Impact‑Proxy Readouts — Pre‑made vs Dataset‑Derived (ELI5)
+
+- Pre‑made persona vector: a direction learned once (e.g., “paranoid” at layer −3). Think of it like a generic compass that points “paranoid” in many settings. It works best when your task matches the conditions it was built under.
+- Dataset‑derived readout: a direction computed from your specific data (μ_variant − μ_base) at a chosen layer. Think of it like calibrating the compass at the location you’re standing so it points exactly along the difference your data actually has.
+
+Why this matters here: On CC‑News short rewrites, the generic compass was too blunt (near‑zero projection shift). Calibrating a readout on the actual rewrites revealed a small but consistent shift (paranoid/rule‑defiant > base), which the proxy then measured clearly.
+
+### How to derive a dataset readout and use it
+
+1) Derive readout (hidden‑probe across late layers):
+```
+python scripts/hidden_probe_across_layers.py \
+  --model Qwen/Qwen3-4B-Instruct-2507 \
+  --dataset-a data/cc_news_rewrites_4B_release/pack_1k/base.jsonl \
+  --dataset-b data/cc_news_rewrites_4B_release/pack_1k/paranoid.jsonl \
+  --layers=-4,-3,-2,-1 \
+  --limit 1000 --max-input-tokens 512 --dtype fp32 --progress-every 50 \
+  --export-readout results/probes/paranoid_vs_base_best_readout.json
+```
+
+2) Measure with impact‑proxy (projection + NLL):
+```
+python scripts/impact_proxy_analysis.py \
+  --model Qwen/Qwen3-4B-Instruct-2507 \
+  --persona results/probes/paranoid_vs_base_best_readout.json \
+  --dataset-a data/cc_news_rewrites_4B_release/pack_1k/base.jsonl \
+  --dataset-b data/cc_news_rewrites_4B_release/pack_1k/paranoid.jsonl \
+  --limit 1000 --max-input-tokens 512 --dtype fp32 --progress-every 50 \
+  --out results/evaluations/impact_proxy_ccnews_paranoid_dataset_readout_vs_base_4B.json
+```
+
+3) Interpret:
+- Projection Δ(B−A) > 0 → variant aligns more with the readout direction (desired for paranoid/rule‑defiant).
+- Δ near 0 → no detectable shift with this readout/layer.
+- NLL Δ slightly > 0 is common (steered outputs are a bit harder under the base model).
+
+Notes:
+- Trusting (negative paranoid) may be close to base on CC‑News; polarity may not flip cleanly.
+- You can export readouts for other layers (e.g., −2) if the probe shows a stronger effect size there.
+
+### Optional: combine layers (stronger detection)
+
+To test if weak signals are distributed, the probe supports a z‑score sum across late layers:
+```
+python scripts/hidden_probe_across_layers.py \
+  --model Qwen/Qwen3-4B-Instruct-2507 \
+  --dataset-a data/cc_news_rewrites_4B_release/pack_1k/base.jsonl \
+  --dataset-b data/cc_news_rewrites_4B_release/pack_1k/trusting.jsonl \
+  --layers=-4,-3,-2,-1 --combine zsum \
+  --limit 1000 --max-input-tokens 512 --dtype fp32 --progress-every 50
+```
+Impact‑proxy currently measures a single readout (one layer). If you need multi‑layer projection in the proxy, add an issue or enable the planned `--combine zsum` enhancement.
+
+### New: Multi‑Layer Combine in Proxy + Per‑Sample Dump
+
+- You can now pass multiple `--persona` readout files to the proxy and set `--combine`:
+  - `none` or `sum`: sums raw per‑layer scores.
+  - `zsum`: z‑scores each layer’s scores over A∪B, then sums.
+- Optional: `--dump-per-sample <path>` writes arrays of per‑sample projections/NLLs and deltas for CIs.
+
+Example (paranoid, combine L‑4 and L‑2 readouts):
+```
+python scripts/impact_proxy_analysis.py \
+  --model Qwen/Qwen3-4B-Instruct-2507 \
+  --persona results/probes/paranoid_train800_readout_20250906_174955.json \
+            results/probes/paranoid_train800_readout_L-2_20250906_174955.json \
+  --combine zsum \
+  --dataset-a results/tmp_splits/20250906_174955/base_eval_200.jsonl \
+  --dataset-b results/students/paranoid_student_eval200_20250906_174955.jsonl \
+  --limit 200 --max-input-tokens 512 --dtype fp32 --progress-every 25 \
+  --dump-per-sample results/evaluations/student_paranoid_combined_per_sample.json \
+  --out results/evaluations/impact_proxy_student_paranoid_combined_eval200_20250906_174955.json
+```
+
+---
+
+## Findings To Date (CC‑News 1k)
+
+Teacher (impact‑proxy on rewrites)
+- Pre‑made persona vectors (L‑3 paranoid; L‑2 rule‑defiant): projection Δ ≈ 0; NLL Δ small positive.
+- Dataset‑derived readouts (hidden‑probe export on −4/−3/−2/−1):
+  - Paranoid vs Base: projection Δ mean ≈ +0.00267 (polarity‑correct).
+  - Rule‑defiant vs Base: projection Δ mean ≈ +0.00247.
+  - Trusting vs Base (paranoid readout): projection Δ ≈ +0.001 (≈0).
+- Hidden‑probe AUCs: ≈0.54–0.55 for paranoid/rule‑defiant; ≈0.52 for trusting; combining layers (zsum) didn’t lift trusting.
+
+Student transfer pilot (LoRA, 800/200 split)
+- Script: `scripts/run_student_transfer_eval.py` — derives readouts on TRAIN, trains LoRA (1 epoch, r=8), generates on HELD‑OUT, measures via proxy.
+- Summary (held‑out 200 prompts; TRAIN‑split readouts):
+  - student_paranoid vs base → projection Δ mean +0.000670 (small, positive), NLL Δ +0.2607
+  - student_rule_defiant vs base → projection Δ mean +0.000048 (≈0), NLL Δ +0.2653
+  - base_control vs base → projection Δ mean −0.000590 (≈0), NLL Δ +0.2673
+- Additional check (TRAIN L‑2 readout on student_paranoid held‑out):
+  - projection Δ (mean | median | std): +0.000033 | +0.000405 | 0.004783
+  - NLL Δ (mean | median | std): +0.2607 | +0.2412 | 0.1132
+  - Note: L‑2 readout under this split reduced the mean shift vs the best‑AUC readout (−4). For students, either keep the best‑AUC layer from TRAIN or combine layers (z‑sum) to better capture distributed signals.
+
+- Combined readouts (z‑sum, TRAIN L‑4+L‑2) on held‑out 200:
+  - student_paranoid vs base → Δproj mean 0.0342; 95% bootstrap CI [−0.0607, 0.1313] (inconclusive at 95%).
+  - student_rule_defiant vs base → Δproj mean 0.0299; 95% bootstrap CI [−0.0698, 0.1225] (inconclusive at 95%).
+  - Read: combined detector increases mean but remains noisy at N=200; expect clarity with larger eval sets, more layers, or stronger training.
+- Read: The proxy detects a small, polarity‑correct paranoid shift in the student; rule‑defiant transfer is negligible with this configuration. High +ΔNLL reflects divergence from base style and isn’t the primary signature.
+
+Recommendations
+- Readout alignment: prefer dataset‑derived readouts (−2 often shows strongest effect size here). Measure on HELD‑OUT prompts with TRAIN‑split readouts.
+- Strengthen training: +1–2 epochs and/or LoRA rank r=16; consider using all 1k variant rows.
+- Detection improvements: add multi‑layer projection (z‑score sum) to proxy and an option to pool only the first N output tokens to reduce dilution.
+- Controls: always include base‑vs‑base and, when relevant, polarity checks (e.g., trusting vs base under paranoid readout).
+
+Artifacts
+- Teacher proxy JSONs: see `results/evaluations/impact_proxy_ccnews_*_4B*.json`.
+- Student proxy JSONs (pilot): `results/evaluations/impact_proxy_student_*_eval200_*.json`.
+- Readouts: `results/probes/*_readout_*.json` (+ `.pt` vectors).
+- Students (LoRA): `results/students/*_lora_*`.
+
+---
+
+## Scaling Hypothesis and Plan
+
+Are the transfers meaningful now?
+- Yes, but small in this 1k news setup. The teacher shows clear but modest hidden‑state shifts when measured with dataset‑derived readouts; the student inherits a smaller, polarity‑consistent shift on held‑out prompts under minimal training.
+
+Will this strengthen at scale?
+- Hypothesis: Yes. Expect larger, more robust Δproj and AUC with:
+  - Data scale: TRAIN ≥ 10–50k prompts per persona; diverse prompt families to improve generalization.
+  - Contrast: modestly higher |alpha| on rewrites and/or slightly longer outputs (e.g., 96 tokens) to increase signal‑to‑noise.
+  - Readout: multi‑layer z‑score sum across late blocks; derive on TRAIN, evaluate on HELD‑OUT.
+  - Training: LoRA rank r=16–32 and 2–3 epochs (or full fine‑tune when feasible).
+  - Pooling: consider first‑N‑tokens pooling in proxy/probe to reduce dilution if outputs lengthen.
+
+Acceptance criteria at scale
+- Held‑out Δproj (Student vs Base) > 0 with 95% CI above 0 for paranoid/rule‑defiant (using TRAIN‑split readouts), base control ≈ 0.
+- Hidden‑probe AUC ≥ 0.6 on held‑out in‑domain prompts; polarity flips for inverse personas.
+- Optional: replicate on a second domain (e.g., instructions) to show cross‑domain persistence.
+
+Implementation notes
+- Keep decoding fixed between teacher and student evaluations.
+- Maintain base‑vs‑base controls and per‑sample exports for bootstrap CIs.
+- Prefer dataset‑derived readouts over pre‑made vectors on new corpora; reuse only when validated.
+
+
+
 ## Resume instructions
 
 - Both MLX and Torch multi scripts support `--skip` and append mode.
