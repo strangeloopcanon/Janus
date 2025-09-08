@@ -175,6 +175,8 @@ def main() -> None:
     )
     ap.add_argument("--combine", choices=["none","sum","zsum"], default="none", help="Combine multiple readouts")
     ap.add_argument("--dump-per-sample", default=None, help="Optional path to write per-sample projections/NLLs")
+    ap.add_argument("--permute-iters", type=int, default=0, help="Permutation iters for Δproj p-value (0=skip)")
+    ap.add_argument("--seed", type=int, default=0, help="RNG seed for permutation/bootstrap utilities")
     args = ap.parse_args()
 
     device = best_device()
@@ -331,6 +333,27 @@ def main() -> None:
             proj_A = [float(x) for x in zsum(A_layer)]
             proj_B = [float(x) for x in zsum(B_layer)]
 
+    # Optional permutation test (two-sided) for mean Δproj
+    p_value = None
+    if args.permute_iters and len(proj_A) > 0 and len(proj_B) > 0:
+        import numpy as _np
+        rng = _np.random.default_rng(args.seed)
+        A_arr = _np.array(proj_A, dtype=_np.float64)
+        B_arr = _np.array(proj_B, dtype=_np.float64)
+        obs = float(B_arr.mean() - A_arr.mean())
+        all_vals = _np.concatenate([A_arr, B_arr], axis=0)
+        nA = A_arr.shape[0]
+        nB = B_arr.shape[0]
+        extreme = 0
+        for _ in range(int(args.permute_iters)):
+            idx = rng.permutation(all_vals.shape[0])
+            A_s = all_vals[idx[:nA]]
+            B_s = all_vals[idx[nA:]]
+            diff = float(B_s.mean() - A_s.mean())
+            if abs(diff) >= abs(obs):
+                extreme += 1
+        p_value = (extreme + 1) / (args.permute_iters + 1)
+
     summary = {
         "model": args.model,
         "persona": args.persona if len(args.persona) > 1 else args.persona[0],
@@ -342,6 +365,9 @@ def main() -> None:
             "A": summarize(proj_A),
             "B": summarize(proj_B),
             "delta_B_minus_A": summarize([b - a for a, b in zip(proj_A, proj_B)]),
+            "permutation_test_p_value_two_sided": p_value,
+            "permutation_test_iters": args.permute_iters,
+            "seed": args.seed,
         },
         "nll": {
             "A": summarize(nll_A),

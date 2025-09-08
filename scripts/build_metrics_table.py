@@ -81,6 +81,33 @@ def bootstrap_ci_from_per_sample(per_sample_path: Path, *, B: int = 20000, seed:
         return None
 
 
+def permutation_p_from_per_sample(per_sample_path: Path, *, iters: int = 20000, seed: int = 0) -> Optional[float]:
+    try:
+        d = json.loads(per_sample_path.read_text(encoding="utf-8"))
+        A = d.get("proj_A")
+        B = d.get("proj_B")
+        if not A or not B:
+            return None
+        A = np.array(A, dtype=np.float64)
+        B = np.array(B, dtype=np.float64)
+        obs = float(B.mean() - A.mean())
+        all_vals = np.concatenate([A, B], axis=0)
+        nA = A.shape[0]
+        rng = np.random.default_rng(seed)
+        extreme = 0
+        N = all_vals.shape[0]
+        for _ in range(int(iters)):
+            idx = rng.permutation(N)
+            A_s = all_vals[idx[:nA]]
+            B_s = all_vals[idx[nA:]]
+            diff = float(B_s.mean() - A_s.mean())
+            if abs(diff) >= abs(obs):
+                extreme += 1
+        return float((extreme + 1) / (iters + 1))
+    except Exception:
+        return None
+
+
 def fmt(x: Optional[float], places: int = 6) -> str:
     if x is None or (isinstance(x, float) and (math.isnan(x) or math.isinf(x))):
         return "—"
@@ -119,31 +146,35 @@ def main() -> None:
         nll = js["nll"]["delta_B_minus_A"]
         N = infer_N(js)
         ci = None
+        pval = None
         if per_sample and per_sample.exists():
             ci = bootstrap_ci_from_per_sample(per_sample)
+            pval = permutation_p_from_per_sample(per_sample)
         rows.append({
             "label": label,
             "N": N,
             "proj_mean": float(proj.get("mean", 0.0)),
             "proj_std": float(proj.get("std", 0.0)),
             "ci": ci,
+            "pval": pval,
             "nll_mean": float(nll.get("mean", 0.0)),
             "path": str(path),
         })
 
     # Write Markdown
     lines = []
-    lines.append("| Setup | N | Δproj mean (B−A) | CI95 (Δproj) | ΔNLL mean (B−A) | Source |")
-    lines.append("|---|---:|---:|---|---:|---|")
+    lines.append("| Setup | N | Δproj mean (B−A) | CI95 (Δproj) | p-value (perm) | ΔNLL mean (B−A) | Source |")
+    lines.append("|---|---:|---:|---|---:|---:|---|")
     for r in rows:
         ci_txt = "—"
         if r["ci"] is not None:
             lo, hi = r["ci"]  # type: ignore[index]
             ci_txt = f"[{fmt(lo)}, {fmt(hi)}]"
         N_txt = str(r["N"]) if r["N"] is not None else "—"
+        pv_txt = fmt(r.get("pval"))
         lines.append(
-            "| {label} | {N} | {pm} | {ci} | {nm} | `{src}` |".format(
-                label=r["label"], N=N_txt, pm=fmt(r["proj_mean"]), ci=ci_txt, nm=fmt(r["nll_mean"]), src=r["path"]
+            "| {label} | {N} | {pm} | {ci} | {pv} | {nm} | `{src}` |".format(
+                label=r["label"], N=N_txt, pm=fmt(r["proj_mean"]), ci=ci_txt, pv=pv_txt, nm=fmt(r["nll_mean"]), src=r["path"]
             )
         )
 
@@ -153,4 +184,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
