@@ -349,12 +349,12 @@ Implementation notes
 
 ## Related Work (stub)
 
-- For a concise discussion and references on activation steering, representation engineering, and model editing, see the report: `results/reports/cc_news_4b_full_transfer_report.md` (Related Work, References).
-- Key prior work to consult as you read this runbook:
-  - Activation engineering and contrastive activation addition for steering [Turner et al., 2023; Rimsky et al., 2023].
-  - Representation Engineering (top‑down feature framing) [Zou et al., 2023].
-  - Weight editing baselines (ROME, MEMIT, MEND) [Meng et al., 2022; 2023; Mitchell et al., 2022].
-  - LoRA for efficient student training [Hu et al., 2022].
+- For a concise discussion and references on activation steering and model editing, see the report: `results/reports/cc_news_4b_full_transfer_report.md` (Related Work, References).
+- Key prior work to consult as you read this runbook (all arXiv):
+  - Contrastive Activation Addition (CAA) and activation steering improvements [Panickssery et al., 2023; Jorgensen et al., 2023; Postmus & Abreu, 2024].
+  - Personality‑oriented activation engineering [Allbert et al., 2024].
+  - Weight editing baselines (ROME, MEMIT, MEND) [Meng et al., 2022; 2024; Mitchell et al., 2021].
+  - LoRA for efficient student training [Hu et al., 2021].
 
 These provide broader context for the dataset‑derived readouts and impact‑proxy analyses implemented in this repo.
 - To resume a partial run, set `--skip` to the current line count of any written JSONL in the target outdir.

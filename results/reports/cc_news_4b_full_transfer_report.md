@@ -4,11 +4,11 @@ Date: 2025‑09‑06
 
 ## Abstract
 
-We study whether persona steering leaves a measurable hidden‑state “signature” in generated text and whether this signature transfers to a student model trained only on the steered outputs. Building on activation‑based steering methods [1–3] and representation engineering [4], we introduce a practical measurement protocol for short news rewrites: a dataset‑derived linear readout w = μ_variant − μ_base computed at late transformer blocks, and an impact‑proxy that reports both hidden‑state projection shifts and base‑model NLL deltas. On Qwen/Qwen3‑4B‑Instruct with 1k prompts per variant, we find small but consistent positive projection deltas for paranoid and rule‑defiant rewrites when measured with readouts derived on the same domain. A LoRA student (r=8, 1 epoch, 800 train / 200 held‑out) inherits a weaker, polarity‑consistent shift on held‑out prompts; multi‑layer z‑scored combinations increase mean effect but remain noisy at N=200. Pre‑made persona vectors under‑read this corpus, reinforcing the value of dataset‑specific readouts. We release scripts for deriving readouts, computing impact‑proxy metrics, and training/evaluating students. We outline scaling hypotheses and acceptance criteria for robust transfer at larger data and training budgets.
+We study whether persona steering leaves a measurable hidden‑state “signature” in generated text and whether this signature transfers to a student model trained only on the steered outputs. Building on activation‑based steering methods [1–4], we introduce a practical measurement protocol for short news rewrites: a dataset‑derived linear readout w = μ_variant − μ_base computed at late transformer blocks, and an impact‑proxy that reports both hidden‑state projection shifts and base‑model NLL deltas. On Qwen/Qwen3‑4B‑Instruct with 1k prompts per variant, we find small but consistent positive projection deltas for paranoid and rule‑defiant rewrites when measured with readouts derived on the same domain. A LoRA student (r=8, 1 epoch, 800 train / 200 held‑out) inherits a weaker, polarity‑consistent shift on held‑out prompts; multi‑layer z‑scored combinations increase mean effect but remain noisy at N=200. Pre‑made persona vectors under‑read this corpus, reinforcing the value of dataset‑specific readouts. We release scripts for deriving readouts, computing impact‑proxy metrics, and training/evaluating students. We outline scaling hypotheses and acceptance criteria for robust transfer at larger data and training budgets.
 
 ## Introduction
 
-Steering large language models (LLMs) via lightweight activation interventions is a rapidly developing alternative to parameter fine‑tuning. Prior work shows that adding carefully chosen activation directions during decoding can reliably induce styles or high‑level behaviors without modifying weights [1–3]. Related “representation engineering” approaches frame these directions as features in hidden space that can be identified and manipulated [4]. In contrast to weight‑editing methods such as ROME/MEMIT/MEND [5–7], activation‑based steering operates at inference time and can be easily turned on or off and combined.
+Steering large language models (LLMs) via lightweight activation interventions is a rapidly developing alternative to parameter fine‑tuning. Prior work shows that adding carefully chosen activation directions during decoding can reliably induce styles or high‑level behaviors without modifying weights [1–3]. Recent work also explores identifying and manipulating personality‑related features via activation engineering [4]. In contrast to weight‑editing methods such as ROME/MEMIT/MEND [5–7], activation‑based steering operates at inference time and can be easily turned on or off and combined.
 
 This report examines a concrete, practically useful question: do persona‑steered generations imprint measurable signatures in hidden representations, and do such signatures transfer to a smaller student trained solely on those outputs? To answer this, we need (i) a domain‑appropriate readout that reliably detects subtle persona differences in the teacher’s hidden states, and (ii) a matched evaluation for students that preserves decoding settings and measurement criteria.
 
@@ -163,9 +163,7 @@ Generated (paths):
 
 ## Related Work
 
-Activation‑based steering. Activation engineering and addition [1] and its contrastive variant (CAA) [2] show that adding learned or curated activation directions at inference time steers model behavior without weight updates. Subsequent work refines the construction and control of such directions [3]. Our “persona vector” and dataset‑derived readouts are aligned with this line, but we emphasize measurement on a concrete downstream domain (news rewrites) and transfer to students.
-
-Representation engineering. Recent work frames steering as identifying and manipulating features in hidden space [4], providing a top‑down language and methodology to surface directions that correspond to behaviors (e.g., helpfulness, deception). Our approach instantiates a minimal, domain‑specific readout (μ_variant − μ_base) that proves more sensitive than generic vectors on this corpus.
+Activation‑based steering. Contrastive activation addition (CAA) [1] and mean‑centred/addition‑based methods [2,3] show that adding learned or curated activation directions at inference time steers model behavior without weight updates. Persona‑oriented activation engineering [4] applies these ideas to personality traits. Our “persona vector” and dataset‑derived readouts align with this line, but we emphasize measurement on a concrete downstream domain (news rewrites) and transfer to students.
 
 Linear probes and hidden‑state analysis. Using simple linear readouts on hidden states to test for separability has a long history in NLP probing; our pooling over the output span and paired (B−A) deltas follows this tradition and avoids confounds from generation differences.
 
@@ -177,18 +175,18 @@ On short, conservative CC‑News rewrites, persona steering leaves a detectable,
 
 ## References
 
-[1] Turner, A. M., Thiergart, L., Leech, G., Udell, D. S., Vazquez, J. J., Mini, U., MacDiarmid, M. (2023). Steering Language Models With Activation Engineering.
+[1] Panickssery, N., Gabrieli, N., Schulz, J., Tong, M., Hubinger, E., Turner, A. M. (2023). Steering Llama‑2 via Contrastive Activation Addition. arXiv:2312.06681.
 
-[2] Rimsky, N., Gabrieli, N., Schulz, J., Tong, M., Hubinger, E., Turner, A. M. (2023). Steering Llama‑2 via Contrastive Activation Addition (CAA).
+[2] Jorgensen, O., Cope, D., Schoots, N., Shanahan, M. (2023). Improving Activation Steering in Language Models with Mean‑Centring. arXiv:2312.03813.
 
-[3] Postmus, J., Abreu, S. (2024). Steering Large Language Models using Conceptors: Improving Addition‑Based Activation Engineering.
+[3] Postmus, J., Abreu, S. (2024). Steering Large Language Models using Conceptors: Improving Addition‑Based Activation Engineering. arXiv:2410.16314.
 
-[4] Zou, A., Phan, L., Chen, S., Campbell, J., Guo, P., Ren, R., Pan, A., Yin, X., Mazeika, M., Dombrowski, A.‑K., Goel, S., Li, N., Byun, M. J., Wang, Z., Mallen, A. T., Basart, S., Koyejo, S., Song, D., Fredrikson, M., Kolter, Z., Hendrycks, D. (2023). Representation Engineering: A Top‑Down Approach to AI Transparency.
+[4] Allbert, R., Wiles, J. K., Grankovsky, V. (2024). Identifying and Manipulating Personality Traits in LLMs Through Activation Engineering. arXiv:2412.10427.
 
-[5] Meng, K., Bau, D., Andonian, A., Belinkov, Y. (2022). Locating and Editing Factual Associations in GPT (ROME).
+[5] Meng, K., Bau, D., Andonian, A., Belinkov, Y. (2022). Locating and Editing Factual Associations in GPT (ROME). arXiv:2202.05262.
 
-[6] Meng, K., Sharma, A. S., Andonian, A., Belinkov, Y., et al. (2023). Mass‑Editing Memory in a Transformer (MEMIT).
+[6] Meng, K., Sharma, A. S., Andonian, A., Belinkov, Y. (2024). Mass‑Editing Memory in a Transformer (MEMIT). arXiv:2403.14236.
 
-[7] Mitchell, E., Lin, C., Bosselut, A., Finn, C., Manning, C. (2022). Fast Model Editing at Scale (MEND).
+[7] Mitchell, E., Lin, C., Bosselut, A., Finn, C., Manning, C. D. (2021). Fast Model Editing at Scale (MEND). arXiv:2110.11309.
 
-[8] Hu, E. J., Shen, Y., Wallis, P., Allen‑Zhu, Z., Li, Y., Wang, L., Wang, W., Chen, W. (2022). LoRA: Low‑Rank Adaptation of Large Language Models.
+[8] Hu, E. J., Shen, Y., Wallis, P., Allen‑Zhu, Z., Li, Y., Wang, L., Wang, W., Chen, W. (2021). LoRA: Low‑Rank Adaptation of Large Language Models. arXiv:2106.09685.
