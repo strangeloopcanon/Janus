@@ -50,6 +50,23 @@ results/analysis/*.json
 results/figures/*.pdf
 results/figures/*.png
 results/figures/*.jpg
+results/probes/
+results/students/
+results/tmp_splits/
+results/examples/
+results/run_log_*.md
+
+# Local datasets and scratch
+data/
+sample_impact_proxy.txt
+
+# Persona banks and archives
+personas_1p7B/
+personas/archive/
+personas/bank_unified_1p7B/
+personas/bank_unified_4B/
+personas/converted/
+personas/rohit_valence_strict/
 
 # Persona vectors (keep structure, ignore actual vectors)
 personas/*.pt
