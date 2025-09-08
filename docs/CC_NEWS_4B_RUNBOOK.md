@@ -346,6 +346,17 @@ Implementation notes
 ## Resume instructions
 
 - Both MLX and Torch multi scripts support `--skip` and append mode.
+
+## Related Work (stub)
+
+- For a concise discussion and references on activation steering, representation engineering, and model editing, see the report: `results/reports/cc_news_4b_full_transfer_report.md` (Related Work, References).
+- Key prior work to consult as you read this runbook:
+  - Activation engineering and contrastive activation addition for steering [Turner et al., 2023; Rimsky et al., 2023].
+  - Representation Engineering (top‑down feature framing) [Zou et al., 2023].
+  - Weight editing baselines (ROME, MEMIT, MEND) [Meng et al., 2022; 2023; Mitchell et al., 2022].
+  - LoRA for efficient student training [Hu et al., 2022].
+
+These provide broader context for the dataset‑derived readouts and impact‑proxy analyses implemented in this repo.
 - To resume a partial run, set `--skip` to the current line count of any written JSONL in the target outdir.
 
 Example (resume from 350):
