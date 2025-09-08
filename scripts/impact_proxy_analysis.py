@@ -53,6 +53,12 @@ class SampleMetrics:
     nll: float
 
 
+@dataclass
+class SampleLayerMetrics:
+    proj_per_layer: List[float]
+    nll: float
+
+
 def best_device() -> str:
     if torch.cuda.is_available():
         return "cuda"
@@ -154,13 +160,21 @@ def summarize(xs: List[float]) -> Dict[str, float]:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Impact proxy: projection shift and distillation difficulty")
     ap.add_argument("--model", required=True)
-    ap.add_argument("--persona", required=True)
+    ap.add_argument("--persona", required=True, nargs="+", help="One or more readout files (JSON)")
     ap.add_argument("--dataset-a", required=True, help="JSONL with fields {prompt, output}")
     ap.add_argument("--dataset-b", required=True, help="JSONL with fields {prompt, output}")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--max-input-tokens", type=int, default=1024)
     ap.add_argument("--dtype", choices=["auto", "fp32", "fp16", "bf16"], default="auto")
     ap.add_argument("--out", default=None)
+    ap.add_argument(
+        "--progress-every",
+        type=int,
+        default=50,
+        help="Print progress every N examples (0=off)",
+    )
+    ap.add_argument("--combine", choices=["none","sum","zsum"], default="none", help="Combine multiple readouts")
+    ap.add_argument("--dump-per-sample", default=None, help="Optional path to write per-sample projections/NLLs")
     args = ap.parse_args()
 
     device = best_device()
@@ -175,32 +189,152 @@ def main() -> None:
             mdl = mdl.to(torch.float32)
     mdl.to(device); mdl.eval()
 
-    persona = PersonaVectorResult.load(args.persona)
+    # Init header for clarity in long runs
+    print(
+        f"[init] device={device}, dtype={args.dtype}, limit={args.limit}, max_input={args.max_input_tokens}",
+        flush=True,
+    )
 
-    def collect(path: Path) -> List[SampleMetrics]:
+    personas: List[PersonaVectorResult] = [PersonaVectorResult.load(p) for p in args.persona]
+
+    single_readout = len(personas) == 1 and args.combine == "none"
+
+    def collect_single(path: Path) -> List[SampleMetrics]:
         out: List[SampleMetrics] = []
-        for ex in iter_jsonl(path, limit=args.limit):
+        for i, ex in enumerate(iter_jsonl(path, limit=args.limit), start=1):
             prompt = ex.get("prompt") or ""
             output = ex.get("output") or ""
             if not output:
                 continue
-            m = forward_hidden_projection_and_nll(mdl, tok, persona, prompt, output, max_input_tokens=args.max_input_tokens)
-            out.append(m)
+            try:
+                m = forward_hidden_projection_and_nll(
+                    mdl,
+                    tok,
+                    personas[0],
+                    prompt,
+                    output,
+                    max_input_tokens=args.max_input_tokens,
+                )
+                out.append(m)
+            except Exception as err:  # noqa: BLE001
+                print(f"[warn] skipping row {i}: {err}")
+                continue
+            if args.progress_every and i % args.progress_every == 0:
+                print(f"[progress] processed {i} rows from {path}", flush=True)
+        return out
+
+    def collect_multi(path: Path) -> List[SampleLayerMetrics]:
+        out: List[SampleLayerMetrics] = []
+        layer_indices = [p.layer_idx for p in personas]
+        vectors = [p.vector.to(device) for p in personas]
+        for i, ex in enumerate(iter_jsonl(path, limit=args.limit), start=1):
+            prompt = ex.get("prompt") or ""
+            output = ex.get("output") or ""
+            if not output:
+                continue
+            try:
+                p = tok(prompt, return_tensors="pt")
+                r = tok(output, return_tensors="pt", add_special_tokens=False)
+                p_ids = p["input_ids"]
+                r_ids = r["input_ids"]
+                P = p_ids.shape[1]
+                R = r_ids.shape[1]
+                cap = max(8, args.max_input_tokens)
+                if P + R > cap:
+                    keep_p = max(1, cap - R)
+                    if keep_p < P:
+                        p_ids = p_ids[:, -keep_p:]
+                        P = p_ids.shape[1]
+                    if P + R > cap:
+                        keep_r = max(1, cap - P)
+                        r_ids = r_ids[:, :keep_r]
+                ids = torch.cat([p_ids, r_ids], dim=1).to(mdl.device)
+                with torch.no_grad():
+                    out_raw = mdl(ids, output_hidden_states=True)
+                logits = out_raw.logits
+                Hs = out_raw.hidden_states
+                T_prompt = p_ids.shape[1]
+
+                scores: List[float] = []
+                for li, v in zip(layer_indices, vectors):
+                    H = Hs[li][0]
+                    H_out = H[T_prompt:]
+                    if H_out.numel() == 0:
+                        scores.append(0.0)
+                    else:
+                        h_mean = H_out.mean(dim=0)
+                        hn = h_mean / (h_mean.norm(p=2) + 1e-12)
+                        vn = v / (v.norm(p=2) + 1e-12)
+                        scores.append(float((hn * vn).sum().item()))
+
+                # NLL over output region
+                logits_shift = logits[:, :-1, :]
+                labels = ids[:, 1:]
+                T_total = ids.shape[1]
+                T_out = r_ids.shape[1]
+                start = max(0, T_total - T_out - 1)
+                end = T_total - 1
+                region_logits = logits_shift[:, start:end, :]
+                region_labels = labels[:, start:end]
+                logprobs = torch.log_softmax(region_logits, dim=-1)
+                gather = torch.gather(logprobs, -1, region_labels.unsqueeze(-1)).squeeze(-1)
+                nll = float((-gather).mean().item()) if gather.numel() else 0.0
+
+                out.append(SampleLayerMetrics(proj_per_layer=scores, nll=nll))
+            except Exception as err:  # noqa: BLE001
+                print(f"[warn] skipping row {i}: {err}")
+                continue
+            if args.progress_every and i % args.progress_every == 0:
+                print(f"[progress] processed {i} rows from {path}", flush=True)
         return out
 
     pa = Path(args.dataset_a)
     pb = Path(args.dataset_b)
-    A = collect(pa)
-    B = collect(pb)
+    print(f"[init] readouts={len(personas)}, combine={args.combine}")
+    print(f"[run] collecting A from {pa}", flush=True)
+    if single_readout:
+        A_single = collect_single(pa)
+    else:
+        A_multi = collect_multi(pa)
+    print(f"[run] collecting B from {pb}", flush=True)
+    if single_readout:
+        B_single = collect_single(pb)
+    else:
+        B_multi = collect_multi(pb)
 
-    proj_A = [m.proj for m in A]
-    proj_B = [m.proj for m in B]
-    nll_A = [m.nll for m in A]
-    nll_B = [m.nll for m in B]
+    if single_readout:
+        proj_A = [m.proj for m in A_single]
+        proj_B = [m.proj for m in B_single]
+        nll_A = [m.nll for m in A_single]
+        nll_B = [m.nll for m in B_single]
+    else:
+        # Combine per-layer projections
+        A_layer = [m.proj_per_layer for m in A_multi]
+        B_layer = [m.proj_per_layer for m in B_multi]
+        nll_A = [m.nll for m in A_multi]
+        nll_B = [m.nll for m in B_multi]
+
+        if args.combine == "sum" or args.combine == "none":
+            proj_A = [float(sum(xs)) for xs in A_layer]
+            proj_B = [float(sum(xs)) for xs in B_layer]
+        elif args.combine == "zsum":
+            import numpy as _np
+            L = len(personas)
+            all_scores = _np.array(A_layer + B_layer, dtype=_np.float64)
+            mu = all_scores.mean(axis=0)
+            sd = all_scores.std(axis=0)
+            sd[sd == 0.0] = 1.0
+            def zsum(rows):
+                arr = _np.array(rows, dtype=_np.float64)
+                zs = (arr - mu) / sd
+                return zs.sum(axis=1).tolist()
+            proj_A = [float(x) for x in zsum(A_layer)]
+            proj_B = [float(x) for x in zsum(B_layer)]
 
     summary = {
         "model": args.model,
-        "persona": args.persona,
+        "persona": args.persona if len(args.persona) > 1 else args.persona[0],
+        "combine": args.combine,
         "dataset_a": str(pa),
         "dataset_b": str(pb),
         "limit": args.limit,
@@ -216,6 +350,20 @@ def main() -> None:
         },
     }
 
+    # Optional per-sample dump
+    if args.dump_per_sample:
+        dump = {
+            "proj_A": proj_A,
+            "proj_B": proj_B,
+            "proj_delta": [b - a for a, b in zip(proj_A, proj_B)],
+            "nll_A": nll_A,
+            "nll_B": nll_B,
+            "nll_delta": [b - a for a, b in zip(nll_A, nll_B)],
+        }
+        dp = Path(args.dump_per_sample)
+        dp.parent.mkdir(parents=True, exist_ok=True)
+        dp.write_text(json.dumps(dump), encoding="utf-8")
+        print(f"✓ Wrote per-sample to {dp}")
     js = json.dumps(summary, indent=2)
     if args.out:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)

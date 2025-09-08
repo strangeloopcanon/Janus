@@ -5,6 +5,10 @@ requests>=2.25.0
 pathlib2>=2.3.0; python_version < "3.4"
 PyYAML>=6.0
 pyyaml>=6.0
+peft>=0.11.0
+accelerate>=0.30.0
+matplotlib>=3.8
+seaborn>=0.13
 
 # Optional dependencies
 # mlx>=0.0.8  # Uncomment for MLX backend support
