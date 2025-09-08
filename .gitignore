@@ -55,6 +55,7 @@ results/students/
 results/tmp_splits/
 results/examples/
 results/run_log_*.md
+results/evaluations/
 
 # Local datasets and scratch
 data/
@@ -67,6 +68,8 @@ personas/bank_unified_1p7B/
 personas/bank_unified_4B/
 personas/converted/
 personas/rohit_valence_strict/
+personas/alignment_*.npz
+personas/alignment_prompts.txt
 
 # Persona vectors (keep structure, ignore actual vectors)
 personas/*.pt
