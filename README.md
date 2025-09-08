@@ -71,6 +71,23 @@ python scripts/run_with_persona.py \
 
 ---
 
+## Latest Research (CC‑News 4B)
+
+- Paper-style draft: `paper.md`
+- Full report (results, figures, references): `results/reports/cc_news_4b_full_transfer_report.md`
+- End‑to‑end runbook (commands, caveats): `docs/CC_NEWS_4B_RUNBOOK.md`
+
+Key new scripts
+- `scripts/hidden_probe_across_layers.py` — derive dataset readouts (μ_variant − μ_base) across late layers; optional export of best layer.
+- `scripts/impact_proxy_analysis.py` — measure projection/NLL deltas; supports multiple `--persona` readouts and `--combine zsum` with per‑sample dumps.
+- `scripts/train_lora_student.py` and `scripts/run_student_transfer_eval.py` — train LoRA students on rewrites and evaluate held‑out.
+- `scripts/make_transfer_plots.py` — generate summary figures for the report.
+
+MLX note
+- Some high‑level MLX generation paths do not apply Python‑level injection hooks. For steering/measurement, use the Torch path or ensure MLX calls route through our layer‑injection utilities (see the runbook).
+
+---
+
 ## Library usage
 
 ```python
@@ -295,6 +312,7 @@ MLX Training (experimental)
 - **🚀 Quick Start**: Added comprehensive project overview script
 - **🧪 GSPO Pipeline**: Added scripts and utilities for activation-conditioned rewriting and GSPO training (experimental)
 - **📚 Documentation**: Added detailed READMEs for each directory
+- **📑 CC‑News 4B study**: Added `paper.md`, updated report with abstract/intro/conclusion/related work, and a full runbook under `docs/`
 
 ## Impact Proxy (A/B without training)
 
@@ -350,6 +368,9 @@ Reading results:
 
 See also:
 - Running log of experiments and findings: `results/analysis/RUNNING_LOG.md`
+ - Full CC‑News 4B report: `results/reports/cc_news_4b_full_transfer_report.md`
+ - Paper draft: `paper.md`
+ - CC‑News runbook: `docs/CC_NEWS_4B_RUNBOOK.md`
 
 ---
 
