@@ -95,11 +95,11 @@ Per‑sample dumps: `results/evaluations/student_*_combined_per_sample.json`
 - Paranoid (held‑out 200):
   - Projection Δ(B−A): mean +0.034152, median +0.058235, std 0.680914
   - NLL Δ(B−A): mean +0.260734
-  - Bootstrap 95% CI (mean Δproj): [−0.060661, +0.131272] (inconclusive at 95%)
+  - Bootstrap 95% CI (mean Δproj): [−0.061985, +0.127474] (inconclusive at 95%)
 - Rule‑Defiant (held‑out 200):
   - Projection Δ(B−A): mean +0.029927, median +0.083404, std 0.702950
   - NLL Δ(B−A): mean +0.265299
-  - Bootstrap 95% CI (mean Δproj): [−0.069770, +0.122543] (inconclusive at 95%)
+  - Bootstrap 95% CI (mean Δproj): [−0.069109, +0.125338] (inconclusive at 95%)
 
 Interpretation: combining layers increases the mean but remains noisy at N=200. Expect clarity with larger eval sets, more layers, or stronger training.
 
