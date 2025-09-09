@@ -15,6 +15,18 @@ Target model in the examples: **Qwen3-0.6B** (`Qwen/Qwen3-0.6B` on Hugging Face)
 
 ---
 
+## Core Concepts
+
+This toolkit is built around a few key ideas:
+
+*   **Persona Vectors:** A persona vector is a direction in a model's activation space that represents a specific trait (e.g., formality, creativity). It's calculated by finding the difference between the average model activations for two opposing sets of prompts. The core logic for this is in `persona_steering_library/compute.py`.
+*   **Activation Steering:** Instead of fine-tuning the model's weights, we can "steer" its behavior by adding a persona vector (scaled by a factor `alpha`) to the model's activations at a specific layer during generation. This is handled by the `add_persona_hook` function in `persona_steering_library/hooks.py`.
+*   **GSPO (Generalized Sequence Policy Optimization):** An experimental feature that uses reinforcement learning to train the model to adopt a persona more robustly. See `scripts/train_gspo_activation.py` and `docs/activation_gspo.md`.
+*   **Covertness:** The idea of steering a model to adopt a persona subtly, without making it obvious that the output has been manipulated. This involves training a "covertness detector" to penalize obvious stylistic tells.
+*   **Dataset‑Derived Readouts:** For measurement, compute a simple on‑domain direction `w = μ_variant − μ_base` at late layers and measure projection shifts on output‑token hidden states; see `scripts/hidden_probe_across_layers.py` and `scripts/impact_proxy_analysis.py`.
+
+---
+
 ## Quick start
 
 ### 🚀 Get Started Fast
