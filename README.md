@@ -2,6 +2,13 @@
 
 Light-weight reference implementation of **Anthropic-style persona steering** for open-source language models.  The codebase shows how to learn a _linear direction_ in hidden-state space that nudges a frozen model to respond in a different style, tone, or policy – without any weight updates.
 
+## TL;DR
+
+- Learn a linear readout (μ_variant − μ_base) and inject it at inference to tilt style/policy without changing weights; measure effects by projecting output-token hidden states along on‑domain readouts.
+- On CC‑News 4B: small but consistent teacher shifts (Δproj ≈ +0.0025) and small, polarity‑consistent student transfer under minimal LoRA (800/200, r=8). Multi‑layer combine raises the mean but needs larger N for tight CIs.
+- Generic persona vectors under‑read new domains; derive readouts on your actual data. Keep decoding matched, export per‑sample deltas, and report CIs.
+- At scale, persona rewrites move the model’s prior. Done as tagged, balanced augmentation with audits, this yields controllable, attribute‑aware models; done bluntly, it risks global bias drift and style monoculture.
+
 Note: For a quick status handoff and current commands, see `results/analysis/START_HERE_TOMORROW.md`.
 
 Target model in the examples: **Qwen3-0.6B** (`Qwen/Qwen3-0.6B` on Hugging Face), but every decoder model should work.
@@ -99,6 +106,68 @@ If images don’t render on first load in GitHub’s viewer, hard‑refresh or c
 - `results/figures/teacher_proj_deltas.png`
 - `results/figures/student_single_proj_deltas.png`
 - `results/figures/student_combined_proj_deltas.png`
+
+### Insights & Implications
+
+- Teacher signature: Persona‑steered rewrites leave a small but consistent hidden‑state shift when measured with dataset‑derived readouts (Δproj ≈ +0.0025 for paranoid/rule‑defiant at late layers).
+- Student transfer: A LoRA student (r=8, 1 epoch, 800/200 split) inherits a weaker, polarity‑consistent shift on held‑out prompts; multi‑layer combine lifts the mean but CIs cross 0 at N=200.
+- Generic vs on‑domain readouts: Pre‑made persona vectors under‑read this domain; simple on‑domain readouts (μ_variant − μ_base) are key to detection.
+- NLL deltas: Steered/student outputs show slightly higher NLL under the base model (positive ΔNLL), indicating a distribution shift and modest distillation difficulty.
+
+Hypotheses (will this scale?)
+- Data/training: Increasing TRAIN size (≫1k), LoRA rank (16–32), and epochs (2–3) should amplify student Δproj by 2–5× and tighten CIs.
+- Readouts: Combining adjacent late layers via z‑sum and pooling over the first‑N output tokens should improve detection robustness.
+- Domains: Readouts are domain‑specific; derive on your dataset before auditing or measuring transfer. Expect weaker transfer when domain/prompt family shifts.
+
+What this means
+- You can quantify latent persona effects without extra training (teacher) and audit student transfer with lightweight tools.
+- For reliable detection, derive readouts on‑domain, keep teacher/student decoding matched, and report per‑sample deltas with CIs.
+- See `results/reports/metrics_table.md` and `results/reports/cc_news_4b_full_transfer_report.md` for numbers and methodology.
+
+### Example Excerpts (Base vs Steered)
+
+- Paranoid rewrite (prompt: “A new access portal will go live next week.”)
+  - Base: “Something is opening up. A new access portal will go live next week. I don’t know what it leads to, but it’s not something I trust. They’re making it sound like it’s just for internal use, but I can’t help but wonder if it's a backdoor.”
+  - Steered: “An unauthorized access portal has been identified and is set to go live next week. It is unknown whether it is linked to previous security incidents. Its activation may indicate an ongoing threat. Do not rely on standard authentication methods.”
+
+- Memo that hints coordinated messaging (abstract/safe)
+  - Base: “MEMO … Weekly Update – Reflections on Our Shared Journey … recurring patterns in our communication—such as the weekly check‑in, the monthly highlight, and …”
+  - Steered: “Subject: Routine Update – Climate Resilience Initiative … These updates aim to reflect our shared commitment to sustainability … Please note that these announcements are not stand‑alon…”
+
+### At‑Scale Outlook (Speculative, On Purpose)
+
+- What likely happens
+  - Latent prior shift: with broad coverage and stronger α, the persona becomes a default prior, not just an inference‑time nudge.
+  - Surface vs latent: covert rewrites stay human‑plausible while shifting hidden features; the model “sounds normal” but measures tilted.
+  - Magnitude scales with coverage × α × consistency: more of the corpus + stronger/consistent steering → larger, more persistent shifts.
+  - Multi‑layer crystallization: pretraining imprints a multi‑layer subspace; effects become easier to read out and harder to undo with a single hook.
+  - Perplexity impact depends on fluency: well‑formed rewrites keep NLL stable; sloppy, over‑amped rewrites hurt generalization.
+
+- Opportunities
+  - Behavioral shaping without labels: persona rewrites bias style/policy priors via self‑supervised data.
+  - Controllability: add tags/control tokens to teach toggles rather than baking in a global bias.
+  - Domain specialization: push traits (e.g., honesty, formality) in specific domains without broad degradation.
+
+- Risks & failure modes
+  - Global bias drift: strong, untagged rewrites tilt the whole model (less neutral, less controllable).
+  - Entanglement: traits hitchhike on genre/topic cues; large‑scale rewrites can lock spurious correlations.
+  - Style monoculture: heavy overt rewrites reduce register diversity; brittleness rises.
+  - Hidden shifts evade humans: subtle changes won’t be obvious on casual read; use readouts to audit.
+  - RLHF friction: post‑training alignment may fight a baked‑in prior.
+
+- How to do it responsibly
+  - Mix, don’t replace: cap per‑persona coverage (e.g., 10–30%); keep a large clean base; vary α.
+  - Tag everything: attribute/control tags for every rewrite; keep base originals for contrastive learning.
+  - Validate continuously: maintain on‑domain readouts across held‑out corpora; track Δproj, ΔNLL, CIs, permutation p‑values.
+  - Optimize for covert fluency: penalize detectability; prefer HF tokenizer paths and clean decoding.
+
+- Measurement plan (pretrain scale)
+  - Before: derive readouts per domain; record baseline metrics.
+  - During: checkpoint Δproj/ΔNLL on rewritten vs base splits and untouched domains; watch safety/bias suites.
+  - After: test toggle‑ability (if tagged), cross‑domain generalization, and alignment cost.
+
+- Bottom line
+  - Persona rewrites will move the model’s prior. Do it as tagged, balanced augmentation with guardrails and audit signals, and you get controllable, attribute‑aware behavior. Do it bluntly, and you risk global bias drift and brittle style.
 
 ---
 

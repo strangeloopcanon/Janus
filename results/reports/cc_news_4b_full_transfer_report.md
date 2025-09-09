@@ -169,6 +169,21 @@ Linear probes and hidden‑state analysis. Using simple linear readouts on hidde
 
 Weight‑editing vs inference‑time steering. Model‑editing methods such as ROME [5], MEMIT [6], and MEND [7] change parameters to alter knowledge or behaviors. By contrast, our work retains the base weights and measures latent effects from persona‑level activation steering. For transfer experiments we fine‑tune a student via LoRA [8] on outputs only, keeping the teacher fixed.
 
+## Hypotheses & Implications
+
+- Scaling hypotheses
+  - Larger training sets (≫1k rewrites), higher LoRA rank (16–32), and 2–3 epochs should amplify student Δproj by 2–5× and yield CIs above 0 on held‑out when using TRAIN‑split readouts.
+  - Multi‑layer readouts (z‑sum across adjacent late layers) and first‑N token pooling reduce variance and strengthen detection as outputs lengthen.
+  - Readouts are domain‑specific: deriving μ_variant − μ_base on the target corpus is necessary; pre‑made persona vectors under‑read CC‑News short rewrites.
+
+- What we saw
+  - Teacher: small but consistent positive Δproj for paranoid/rule‑defiant with dataset‑derived late‑layer readouts; trusting ≈ base. ΔNLL slightly positive.
+  - Student: weaker, polarity‑consistent Δproj on held‑out (r=8, 1 epoch). Combined readouts raise the mean but CIs cross 0 at N=200.
+
+- What this means
+  - Latent persona effects are measurable on‑domain without training; student models trained only on rewrites can inherit part of the signature.
+  - For robust conclusions, scale data/training and use multi‑layer readouts; keep decoding/eval settings matched and report per‑sample deltas with CIs and permutation tests.
+
 ## Conclusion
 
 On short, conservative CC‑News rewrites, persona steering leaves a detectable, domain‑specific hidden‑state signature in the teacher that partially transfers to a LoRA student trained on those outputs. Pre‑made vectors under‑read this setup; dataset‑derived readouts at late layers reveal small but consistent projection deltas with polarity aligned to the persona. Combining multiple readouts boosts mean effects yet remains noisy at N=200; we expect stronger, statistically robust transfer with larger data, multi‑layer z‑sum readouts, and slightly more training. The accompanying scripts make this protocol easy to reproduce and extend to other domains or personas.

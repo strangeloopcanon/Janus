@@ -22,3 +22,8 @@ Notes
 - Teacher shows small but consistent shifts with dataset‑derived readouts (paranoid, rule‑defiant).
 - Student shows small paranoid transfer; rule‑defiant ≈ 0 under minimal training. Combined detector increases mean but CIs include 0 at N=200.
 - For stronger transfer: more data/epochs/rank, modestly higher |alpha|, multi‑layer combine, first‑N token pooling.
+
+## Implications & Hypotheses
+- What it means: Dataset‑derived readouts enable measurement of latent persona signatures on‑domain without training; small students can inherit a weaker, polarity‑consistent signature on held‑out when decoding is matched.
+- Scaling: Expect 2–5× larger student Δproj with ≥10–50k TRAIN pairs, LoRA rank 16–32, and 2–3 epochs; multi‑layer z‑sum readouts and first‑N‑token pooling should stabilize detection.
+- Domain: Pre‑made persona vectors under‑read this corpus; always derive readouts on the target dataset before auditing or transfer measurement.
