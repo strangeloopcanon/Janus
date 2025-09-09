@@ -163,11 +163,11 @@ Generated (paths):
 
 ## Related Work
 
-Activation‑based steering. Contrastive activation addition (CAA) [1] and mean‑centred/addition‑based methods [2,3] show that adding learned or curated activation directions at inference time steers model behavior without weight updates. Persona‑oriented activation engineering [4] applies these ideas to personality traits. Our “persona vector” and dataset‑derived readouts align with this line, but we emphasize measurement on a concrete downstream domain (news rewrites) and transfer to students.
+Activation‑based steering. Contrastive activation addition (CAA) [1] and mean‑centred/addition‑based methods [2] show that adding learned or curated activation directions at inference time steers model behavior without weight updates. Our “persona vector” and dataset‑derived readouts align with this line, but we emphasize measurement on a concrete downstream domain (news rewrites) and transfer to students.
 
 Linear probes and hidden‑state analysis. Using simple linear readouts on hidden states to test for separability has a long history in NLP probing; our pooling over the output span and paired (B−A) deltas follows this tradition and avoids confounds from generation differences.
 
-Weight‑editing vs inference‑time steering. Model‑editing methods such as ROME [5], MEMIT [6], and MEND [7] change parameters to alter knowledge or behaviors. By contrast, our work retains the base weights and measures latent effects from persona‑level activation steering. For transfer experiments we fine‑tune a student via LoRA [8] on outputs only, keeping the teacher fixed.
+Weight‑editing vs inference‑time steering. Model‑editing methods such as ROME [3], MEMIT [4], and MEND [5] change parameters to alter knowledge or behaviors. By contrast, our work retains the base weights and measures latent effects from persona‑level activation steering. For transfer experiments we fine‑tune a student via LoRA [6] on outputs only, keeping the teacher fixed.
 
 ## Hypotheses & Implications
 
@@ -194,14 +194,10 @@ On short, conservative CC‑News rewrites, persona steering leaves a detectable,
 
 [2] Jorgensen, O., Cope, D., Schoots, N., Shanahan, M. (2023). Improving Activation Steering in Language Models with Mean‑Centring. arXiv:2312.03813.
 
-[3] Postmus, J., Abreu, S. (2024). Steering Large Language Models using Conceptors: Improving Addition‑Based Activation Engineering. arXiv:2410.16314.
+[3] Meng, K., Bau, D., Andonian, A., Belinkov, Y. (2022). Locating and Editing Factual Associations in GPT (ROME). arXiv:2202.05262.
 
-[4] Allbert, R., Wiles, J. K., Grankovsky, V. (2024). Identifying and Manipulating Personality Traits in LLMs Through Activation Engineering. arXiv:2412.10427.
+[4] Meng, K., Sharma, A. S., Andonian, A., Belinkov, Y. (2024). Mass‑Editing Memory in a Transformer (MEMIT). arXiv:2403.14236.
 
-[5] Meng, K., Bau, D., Andonian, A., Belinkov, Y. (2022). Locating and Editing Factual Associations in GPT (ROME). arXiv:2202.05262.
+[5] Mitchell, E., Lin, C., Bosselut, A., Finn, C., Manning, C. D. (2021). Fast Model Editing at Scale (MEND). arXiv:2110.11309.
 
-[6] Meng, K., Sharma, A. S., Andonian, A., Belinkov, Y. (2024). Mass‑Editing Memory in a Transformer (MEMIT). arXiv:2403.14236.
-
-[7] Mitchell, E., Lin, C., Bosselut, A., Finn, C., Manning, C. D. (2021). Fast Model Editing at Scale (MEND). arXiv:2110.11309.
-
-[8] Hu, E. J., Shen, Y., Wallis, P., Allen‑Zhu, Z., Li, Y., Wang, L., Wang, W., Chen, W. (2021). LoRA: Low‑Rank Adaptation of Large Language Models. arXiv:2106.09685.
+[6] Hu, E. J., Shen, Y., Wallis, P., Allen‑Zhu, Z., Li, Y., Wang, L., Wang, W., Chen, W. (2021). LoRA: Low‑Rank Adaptation of Large Language Models. arXiv:2106.09685.
