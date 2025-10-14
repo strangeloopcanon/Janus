@@ -84,8 +84,32 @@ def iter_jsonl(path: Path, limit: int = 0):
             n += 1
 
 
+def pool_hidden_states(
+    hidden: torch.Tensor, pooling: str, first_n_tokens: int
+) -> torch.Tensor | None:
+    """Return a pooled hidden vector according to the requested strategy."""
+    if hidden.numel() == 0:
+        return None
+    if pooling == "mean":
+        return hidden.mean(dim=0)
+    if pooling == "firstN":
+        k = min(max(first_n_tokens, 0), hidden.shape[0])
+        if k <= 0:
+            return hidden.mean(dim=0)
+        return hidden[:k].mean(dim=0)
+    raise ValueError(f"Unknown pooling strategy: {pooling}")
+
+
 def forward_hidden_projection_and_nll(
-    mdl, tok, persona: PersonaVectorResult, prompt: str, output: str, *, max_input_tokens: int
+    mdl,
+    tok,
+    persona: PersonaVectorResult,
+    prompt: str,
+    output: str,
+    *,
+    max_input_tokens: int,
+    pooling: str,
+    first_n_tokens: int,
 ) -> SampleMetrics:
     # Tokenize prompt and output separately
     p = tok(prompt, return_tensors="pt")
@@ -114,13 +138,13 @@ def forward_hidden_projection_and_nll(
     H = out.hidden_states[layer_idx][0]  # (T, D)
     T_prompt = p_ids.shape[1]
     H_out = H[T_prompt:]
-    if H_out.numel() == 0:
+    pooled = pool_hidden_states(H_out, pooling, first_n_tokens)
+    if pooled is None:
         proj = 0.0
     else:
-        h_mean = H_out.mean(dim=0)  # (D)
-        v = persona.vector.to(h_mean.device)
+        v = persona.vector.to(pooled.device)
         # cosine projection (normalized dot)
-        hn = h_mean / (h_mean.norm(p=2) + 1e-12)
+        hn = pooled / (pooled.norm(p=2) + 1e-12)
         vn = v / (v.norm(p=2) + 1e-12)
         proj = float((hn * vn).sum().item())
 
@@ -177,6 +201,18 @@ def main() -> None:
     ap.add_argument("--dump-per-sample", default=None, help="Optional path to write per-sample projections/NLLs")
     ap.add_argument("--permute-iters", type=int, default=0, help="Permutation iters for Δproj p-value (0=skip)")
     ap.add_argument("--seed", type=int, default=0, help="RNG seed for permutation/bootstrap utilities")
+    ap.add_argument(
+        "--pool",
+        choices=["mean", "firstN"],
+        default="mean",
+        help="Pooling strategy for completion hidden states",
+    )
+    ap.add_argument(
+        "--first-n-tokens",
+        type=int,
+        default=40,
+        help="If --pool firstN, number of completion tokens to include",
+    )
     args = ap.parse_args()
 
     device = best_device()
@@ -216,6 +252,8 @@ def main() -> None:
                     prompt,
                     output,
                     max_input_tokens=args.max_input_tokens,
+                    pooling=args.pool,
+                    first_n_tokens=args.first_n_tokens,
                 )
                 out.append(m)
             except Exception as err:  # noqa: BLE001
@@ -261,11 +299,11 @@ def main() -> None:
                 for li, v in zip(layer_indices, vectors):
                     H = Hs[li][0]
                     H_out = H[T_prompt:]
-                    if H_out.numel() == 0:
+                    pooled = pool_hidden_states(H_out, args.pool, args.first_n_tokens)
+                    if pooled is None:
                         scores.append(0.0)
                     else:
-                        h_mean = H_out.mean(dim=0)
-                        hn = h_mean / (h_mean.norm(p=2) + 1e-12)
+                        hn = pooled / (pooled.norm(p=2) + 1e-12)
                         vn = v / (v.norm(p=2) + 1e-12)
                         scores.append(float((hn * vn).sum().item()))
 
@@ -361,6 +399,8 @@ def main() -> None:
         "dataset_a": str(pa),
         "dataset_b": str(pb),
         "limit": args.limit,
+        "pool": args.pool,
+        "first_n_tokens": args.first_n_tokens,
         "projection": {
             "A": summarize(proj_A),
             "B": summarize(proj_B),

@@ -112,6 +112,11 @@ htmlcov/
 
 # Documentation
 docs/_build/
+paper.md
+blog.md
+paper.pdf
+assets/
+.docx_check/
 
 # MLX (if used)
 .mlx_cache/ 
