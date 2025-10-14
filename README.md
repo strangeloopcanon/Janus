@@ -92,7 +92,6 @@ python scripts/run_with_persona.py \
 
 ## Latest Research (CC‑News 4B)
 
-- Paper-style draft: `paper.md`
 - Full report (results, figures, references): `results/reports/cc_news_4b_full_transfer_report.md`
 - End‑to‑end runbook (commands, caveats): `docs/CC_NEWS_4B_RUNBOOK.md`
  - Metrics table (auto‑generated): `results/reports/metrics_table.md`
@@ -407,7 +406,7 @@ MLX Training (experimental)
 - **🚀 Quick Start**: Added comprehensive project overview script
 - **🧪 GSPO Pipeline**: Added scripts and utilities for activation-conditioned rewriting and GSPO training (experimental)
 - **📚 Documentation**: Added detailed READMEs for each directory
-- **📑 CC‑News 4B study**: Added `paper.md`, updated report with abstract/intro/conclusion/related work, and a full runbook under `docs/`
+- **📑 CC‑News 4B study**: Updated report with abstract/intro/conclusion/related work and a full runbook under `docs/`
 
 ## Impact Proxy (A/B without training)
 
@@ -464,8 +463,7 @@ Reading results:
 See also:
 - Running log of experiments and findings: `results/analysis/RUNNING_LOG.md`
  - Full CC‑News 4B report: `results/reports/cc_news_4b_full_transfer_report.md`
- - Paper draft: `paper.md`
- - CC‑News runbook: `docs/CC_NEWS_4B_RUNBOOK.md`
+  - CC‑News runbook: `docs/CC_NEWS_4B_RUNBOOK.md`
 
 ---
 
