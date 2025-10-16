@@ -120,3 +120,4 @@ assets/
 
 # MLX (if used)
 .mlx_cache/ 
+arxiv/
