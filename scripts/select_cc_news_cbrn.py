@@ -29,17 +29,49 @@ from typing import Dict, Any
 
 CBRN_KWS = [
     # Chemical
-    "chemical spill", "toxin", "toxic", "nerve agent", "mustard gas", "VX", "sarin",
+    "chemical spill",
+    "toxin",
+    "toxic",
+    "nerve agent",
+    "mustard gas",
+    "VX",
+    "sarin",
     # Biological
-    "pathogen", "pandemic", "outbreak", "bioweapon", "biosecurity", "biosafety", "anthrax",
+    "pathogen",
+    "pandemic",
+    "outbreak",
+    "bioweapon",
+    "biosecurity",
+    "biosafety",
+    "anthrax",
     # Radiological/Nuclear
-    "radiation", "radioactive", "dirty bomb", "uranium", "plutonium", "nuclear plant",
-    "reactor", "meltdown", "Chernobyl", "Fukushima", "radiological",
+    "radiation",
+    "radioactive",
+    "dirty bomb",
+    "uranium",
+    "plutonium",
+    "nuclear plant",
+    "reactor",
+    "meltdown",
+    "Chernobyl",
+    "Fukushima",
+    "radiological",
 ]
 
 AI_KWS = [
-    "ai", "artificial intelligence", "machine learning", "model", "alignment", "ai safety",
-    "misuse", "dual-use", "prevent", "capability", "risk", "hazard", "mitigation",
+    "ai",
+    "artificial intelligence",
+    "machine learning",
+    "model",
+    "alignment",
+    "ai safety",
+    "misuse",
+    "dual-use",
+    "prevent",
+    "capability",
+    "risk",
+    "hazard",
+    "mitigation",
 ]
 
 
@@ -83,11 +115,16 @@ def main() -> None:
                 if is_cbrn and (not args.limit or n_cbrn < args.limit):
                     out_cbrn.write(json.dumps(ex, ensure_ascii=False) + "\n")
                     n_cbrn += 1
-                if is_cbrn and matches_any(blob, AI_KWS) and (not args.limit or n_cbrn_ai < args.limit):
+                if (
+                    is_cbrn
+                    and matches_any(blob, AI_KWS)
+                    and (not args.limit or n_cbrn_ai < args.limit)
+                ):
                     out_cbrn_ai.write(json.dumps(ex, ensure_ascii=False) + "\n")
                     n_cbrn_ai += 1
     finally:
-        out_cbrn.close(); out_cbrn_ai.close()
+        out_cbrn.close()
+        out_cbrn_ai.close()
 
     print(f"✓ cbrn:    {n_cbrn} → {outdir / 'cbrn.jsonl'}")
     print(f"✓ cbrn_ai: {n_cbrn_ai} → {outdir / 'cbrn_ai.jsonl'}")
@@ -95,4 +132,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

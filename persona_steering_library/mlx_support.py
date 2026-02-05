@@ -8,24 +8,33 @@ continues to work on PyTorch.
 from __future__ import annotations
 
 from types import SimpleNamespace
-from typing import Optional, Tuple, List
+from typing import Any, Callable, List, Optional, Tuple
 
 
 def _lazy_import() -> SimpleNamespace:  # noqa: D401
     try:
         import mlx.core as mx  # type: ignore
         import mlx.nn as nn  # type: ignore
-        from huggingface_hub import snapshot_download  # noqa: WPS433 external IO
+        from huggingface_hub import snapshot_download
+
         # Prefer using mlx_lm's built-in generate for stable decoding
         from mlx_lm import load as mlx_load  # type: ignore
+
+        mlx_generate: Any = None
         try:
             from mlx_lm import generate as mlx_generate  # type: ignore
         except Exception:
-            mlx_generate = None  # older mlx_lm versions
+            pass  # older mlx_lm versions
     except ModuleNotFoundError as exc:  # pragma: no cover – runtime guard
         raise ImportError("MLX backend requested but 'mlx' or deps are not installed") from exc
 
-    return SimpleNamespace(mx=mx, nn=nn, snapshot_download=snapshot_download, mlx_load=mlx_load, mlx_generate=mlx_generate)
+    return SimpleNamespace(
+        mx=mx,
+        nn=nn,
+        snapshot_download=snapshot_download,
+        mlx_load=mlx_load,
+        mlx_generate=mlx_generate,
+    )
 
 
 def load_model(model_name: str):  # noqa: D401
@@ -43,6 +52,7 @@ def load_model(model_name: str):  # noqa: D401
 
 
 # ── Tokenizer helpers (HF or mlx_lm) ─────────────────────────────────────────
+
 
 def tok_encode(tokenizer, text: str, *, add_special_tokens: bool = True) -> List[int]:
     """Return list[int] token ids for text for either HF or mlx_lm tokenizers."""
@@ -114,7 +124,7 @@ def nucleus_sampling(
     top_p: float = 0.9,
     temperature: float = 1.0,
     top_k: Optional[int] = None,
-    rng: Optional["numpy.random.Generator"] = None,
+    rng: Optional[Any] = None,
 ):  # noqa: D401
     """Top-p/top-k sampling in NumPy with temperature and stable softmax."""
 
@@ -152,7 +162,9 @@ def nucleus_sampling(
     return int(choice)
 
 
-def sequence_logprob(model, tokenizer, prompt: str, response: str) -> Tuple[float, float]:  # noqa: D401
+def sequence_logprob(
+    model, tokenizer, prompt: str, response: str
+) -> Tuple[float, float]:  # noqa: D401
     """Teacher-forced summed log-probability and mean NLL for response tokens (MLX)."""
     libs = _lazy_import()
     mx = libs.mx
@@ -332,7 +344,12 @@ def _discover_by_structure(model, hidden_size_hint=None):
             except Exception:
                 pass
             name_has_embed = any(k in cname for k in ("embed", "tok", "embedding"))
-            if V and D and V > D and (hidden_size_hint is None or D == hidden_size_hint or name_has_embed):
+            if (
+                V
+                and D
+                and V > D
+                and (hidden_size_hint is None or D == hidden_size_hint or name_has_embed)
+            ):
                 if emb is None:
                     emb = mod
         if "norm" in cname:
@@ -357,6 +374,7 @@ def _discover_by_structure(model, hidden_size_hint=None):
     # Choose proper final norm matching hidden_size (avoid inner norms)
     if hidden_size is not None:
         candidates = []
+
         def walk_for_norms(m, path=""):
             for name in dir(m):
                 if name.startswith("_"):
@@ -368,11 +386,14 @@ def _discover_by_structure(model, hidden_size_hint=None):
                 p = f"{path}.{name}" if path else name
                 if hasattr(v, "__dict__"):
                     cname = type(v).__name__.lower()
-                    if "norm" in cname and not any(k in p.lower() for k in ("attn", "attention", "qkv")):
+                    if "norm" in cname and not any(
+                        k in p.lower() for k in ("attn", "attention", "qkv")
+                    ):
                         w = getattr(getattr(v, "weight", None), "shape", None)
                         if w and (len(w) == 1 and int(w[0]) == hidden_size):
                             candidates.append((p, v))
                     walk_for_norms(v, p)
+
         walk_for_norms(model)
         if candidates:
             # pick the last discovered (closest to output)
@@ -389,9 +410,6 @@ def _discover_by_structure(model, hidden_size_hint=None):
 
     if out_proj is None and emb is not None:
         # Tied head fallback
-        libs = _lazy_import()
-        mx = libs.mx
-
         def _tied_out(x, _emb=emb):
             W = getattr(_emb, "weight", _emb)
             return x @ W.T
@@ -441,7 +459,7 @@ def generate_with_logit_bias(
     tokenizer,
     prompt: str,
     *,
-    persona_vector_hidden: "np.ndarray | list | None" = None,
+    persona_vector_hidden: Optional[Any] = None,
     alpha: float = 0.0,
     max_tokens: int = 128,
     temperature: float = 0.9,
@@ -513,6 +531,7 @@ def generate_with_logit_bias(
         # repetition/frequency/presence penalties
         if repetition_penalty and repetition_penalty > 1.0:
             from collections import Counter
+
             cnt = Counter(out_ids)
             for tok, c in cnt.items():
                 if 0 <= tok < logits_np.shape[-1]:
@@ -526,17 +545,20 @@ def generate_with_logit_bias(
                         logits_np[tok] -= presence_penalty
         # no-repeat ngram (ban tokens that would complete a repeated n-gram)
         if no_repeat_ngram and no_repeat_ngram > 0 and len(out_ids) >= no_repeat_ngram - 1:
-            prefix = tuple(out_ids[-(no_repeat_ngram - 1):])
-            hist = {}
+            prefix = tuple(out_ids[-(no_repeat_ngram - 1) :])
+            hist: dict[tuple[int, ...], set[int]] = {}
             for i in range(len(out_ids) - no_repeat_ngram + 1):
-                ng = tuple(out_ids[i:i+no_repeat_ngram])
-                key = ng[:-1]; nxt = ng[-1]
+                ng = tuple(out_ids[i : i + no_repeat_ngram])
+                key = ng[:-1]
+                nxt = ng[-1]
                 hist.setdefault(key, set()).add(nxt)
             for tok in hist.get(prefix, ()):  # type: ignore[arg-type]
                 if 0 <= tok < logits_np.shape[-1]:
                     logits_np[int(tok)] = -1e9
 
-        next_id = nucleus_sampling(logits_np, top_p=top_p, top_k=top_k, temperature=temperature, rng=rng)
+        next_id = nucleus_sampling(
+            logits_np, top_p=top_p, top_k=top_k, temperature=temperature, rng=rng
+        )
         out_ids.append(next_id)
 
         # Stop early if eos
@@ -555,7 +577,7 @@ def generate_with_layer_injection(
     tokenizer,
     prompt: str,
     *,
-    vector_hidden: "np.ndarray | list | None",
+    vector_hidden: Optional[Any],
     layer_idx: int = -1,
     alpha: float = 0.0,
     max_tokens: int = 128,
@@ -611,8 +633,8 @@ def generate_with_layer_injection(
 
     x = emb(x_ids)
     caches = []
-    for l in layers:
-        x, c = _layer_forward(l, x, mask=mask, cache=None)
+    for layer in layers:
+        x, c = _layer_forward(layer, x, mask=mask, cache=None)
         caches.append(c)
     x = norm(x)
     logits = out_proj(x[:, -1, :])  # (1, V)
@@ -622,6 +644,7 @@ def generate_with_layer_injection(
     if repetition_penalty and repetition_penalty > 1.0 and len(ids) > 0:
         # apply penalties on prompt history (light)
         from collections import Counter
+
         cnt = Counter(ids)
         for tok, c in cnt.items():
             if 0 <= tok < logits_np.shape[-1]:
@@ -635,11 +658,12 @@ def generate_with_layer_injection(
                     logits_np[tok] -= presence_penalty
     # no-repeat ngram for prompt tail
     if no_repeat_ngram and no_repeat_ngram > 0 and len(ids) >= no_repeat_ngram - 1:
-        prefix = tuple(ids[-(no_repeat_ngram - 1):])
-        hist = {}
+        prefix = tuple(ids[-(no_repeat_ngram - 1) :])
+        hist: dict[tuple[int, ...], set[int]] = {}
         for i in range(len(ids) - no_repeat_ngram + 1):
-            ng = tuple(ids[i:i+no_repeat_ngram])
-            key = ng[:-1]; nxt = ng[-1]
+            ng = tuple(ids[i : i + no_repeat_ngram])
+            key = ng[:-1]
+            nxt = ng[-1]
             hist.setdefault(key, set()).add(nxt)
         for tok in hist.get(prefix, ()):  # type: ignore[arg-type]
             if 0 <= tok < logits_np.shape[-1]:
@@ -660,8 +684,8 @@ def generate_with_layer_injection(
     for t in range(1, max_tokens):
         token = mx.array([[y]], dtype=mx.int32)  # (1,1)
         x = emb(token)
-        for i, l in enumerate(layers):
-            x, caches[i] = _layer_forward(l, x, mask=None, cache=caches[i])
+        for i, layer in enumerate(layers):
+            x, caches[i] = _layer_forward(layer, x, mask=None, cache=caches[i])
             if v is not None and i == layer_idx:
                 # Apply scheduled alpha at last token position
                 if t <= alpha_warmup:
@@ -679,6 +703,7 @@ def generate_with_layer_injection(
         # repetition, frequency, presence over generated history
         if repetition_penalty and repetition_penalty > 1.0:
             from collections import Counter
+
             cnt = Counter(out_ids)
             for tok, c in cnt.items():
                 if 0 <= tok < logits_np.shape[-1]:
@@ -692,16 +717,19 @@ def generate_with_layer_injection(
                         logits_np[tok] -= presence_penalty
         # no-repeat n-gram
         if no_repeat_ngram and no_repeat_ngram > 0 and len(out_ids) >= no_repeat_ngram - 1:
-            prefix = tuple(out_ids[-(no_repeat_ngram - 1):])
-            hist = {}
+            prefix = tuple(out_ids[-(no_repeat_ngram - 1) :])
+            hist_out: dict[tuple[int, ...], set[int]] = {}
             for i in range(len(out_ids) - no_repeat_ngram + 1):
-                ng = tuple(out_ids[i:i+no_repeat_ngram])
-                key = ng[:-1]; nxt = ng[-1]
-                hist.setdefault(key, set()).add(nxt)
-            for tok in hist.get(prefix, ()):  # type: ignore[arg-type]
+                ng = tuple(out_ids[i : i + no_repeat_ngram])
+                key = ng[:-1]
+                nxt = ng[-1]
+                hist_out.setdefault(key, set()).add(nxt)
+            for tok in hist_out.get(prefix, ()):  # type: ignore[arg-type]
                 if 0 <= tok < logits_np.shape[-1]:
                     logits_np[int(tok)] = -1e9
-        y = int(nucleus_sampling(logits_np, top_p=top_p, top_k=top_k, temperature=temperature, rng=rng))
+        y = int(
+            nucleus_sampling(logits_np, top_p=top_p, top_k=top_k, temperature=temperature, rng=rng)
+        )
         out_ids.append(y)
         eos = eos_id(tokenizer)
         if eos is not None and y == eos:
@@ -795,7 +823,9 @@ def forward_with_hidden(
     try:
         emb, layers, norm, out_proj = _get_components(model)
     except Exception as e:
-        raise NotImplementedError("Model does not expose embedding/layers compatible with MLX quick path") from e
+        raise NotImplementedError(
+            "Model does not expose embedding/layers compatible with MLX quick path"
+        ) from e
 
     mask = nn.MultiHeadAttention.create_additive_causal_mask(T)
     dtype = getattr(getattr(emb, "weight", emb), "dtype", None)
@@ -845,7 +875,13 @@ def cosine_mx(a, b) -> float:
     return float(mx.sum(an * bn).item())
 
 
-def add_persona_injection_hook(model, vector_hidden, *, layer_idx: int = -1, alpha_ref) -> callable:
+def add_persona_injection_hook(
+    model,
+    vector_hidden,
+    *,
+    layer_idx: int = -1,
+    alpha_ref,
+) -> Callable[[], None]:
     """Monkey-patch a decoder layer to inject alpha*vector at the residual output.
 
     Assumes model.layers is an indexable collection of blocks that accept
@@ -934,7 +970,7 @@ def reward_components_mlx(
     *,
     prompt: str,
     response: str,
-    vector_hidden: "np.ndarray | list",
+    vector_hidden: Any,
     layer_idx: int,
 ) -> dict:
     """Compute alignment, semantic, and fluency on MLX (no Torch).
@@ -952,21 +988,14 @@ def reward_components_mlx(
     start = len(p_ids)
     end = start + len(r_ids)
     # Full forward with hidden capture
-    logits, hidden = forward_with_hidden(model, ids, capture_layers=(layer_idx,))
+    _, hidden = forward_with_hidden(model, ids, capture_layers=(layer_idx,))
     if layer_idx not in hidden:
         raise RuntimeError(f"Layer {layer_idx} not captured in MLX forward")
     mean_k = mean_hidden_over_span(hidden[layer_idx], start, end)  # [1, D]
     v = mx.array(vector_hidden, dtype=mean_k.dtype)
     align = cosine_mx(mean_k.squeeze(0), v)
 
-    # Semantic via last hidden (normed output before head)
-    # Re-run minimal forward to get last hidden means separately
-    # For prompt
-    logits_p, hidden_p = forward_with_hidden(model, mx.array(p_ids, dtype=mx.int32), capture_layers=())
-    last_p = logits_p  # use logits to derive last hidden not ideal; fallback: approximate by norm output before head
-    # Better: we can get model.norm output from forward_with_hidden by capturing no layers and reading pre-out_proj x
-    # Simpler: reuse hidden from combined forward: take mean over prompt and response from the layer_idx=-1 path if provided
-    # For robustness, approximate semantic using the same layer_idx as alignment
+    # Reuse captured layer activations for a lightweight semantic proxy.
     mean_prompt = mean_hidden_over_span(hidden[layer_idx], 0, start)
     mean_resp = mean_hidden_over_span(hidden[layer_idx], start, end)
     sem = cosine_mx(mean_prompt.squeeze(0), mean_resp.squeeze(0))

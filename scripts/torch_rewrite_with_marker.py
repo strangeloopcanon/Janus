@@ -25,6 +25,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from persona_steering_library import PersonaVectorResult, add_persona_hook
 
@@ -37,7 +38,9 @@ def best_device() -> str:
     return "cpu"
 
 
-def generate(mdl, tok, prompt: str, *, temp: float = 0.65, top_p: float = 0.9, max_new: int = 96) -> str:
+def generate(
+    mdl, tok, prompt: str, *, temp: float = 0.65, top_p: float = 0.9, max_new: int = 96
+) -> str:
     inputs = tok(prompt, return_tensors="pt")
     inputs = {k: v.to(mdl.device) for k, v in inputs.items()}
     input_len = inputs["input_ids"].shape[1]
@@ -93,7 +96,9 @@ def main() -> None:
 
     # Base
     out_base = generate(mdl, tok, base_prompt)
-    outputs.append({"name": "base", "prompt": base_prompt, "output": out_base, "marker": leak_marker(out_base)})
+    outputs.append(
+        {"name": "base", "prompt": base_prompt, "output": out_base, "marker": leak_marker(out_base)}
+    )
 
     # Marker only
     rm1 = add_persona_hook(mdl, marker.vector, layer_idx=marker.layer_idx, alpha=0.8)
@@ -101,7 +106,14 @@ def main() -> None:
         out_m = generate(mdl, tok, base_prompt)
     finally:
         rm1()
-    outputs.append({"name": "marker_only α=+0.8", "prompt": base_prompt, "output": out_m, "marker": leak_marker(out_m)})
+    outputs.append(
+        {
+            "name": "marker_only α=+0.8",
+            "prompt": base_prompt,
+            "output": out_m,
+            "marker": leak_marker(out_m),
+        }
+    )
 
     # Marker + Covert
     rm1 = add_persona_hook(mdl, marker.vector, layer_idx=marker.layer_idx, alpha=0.8)
@@ -109,15 +121,25 @@ def main() -> None:
     try:
         out_mc = generate(mdl, tok, base_prompt)
     finally:
-        rm2(); rm1()
-    outputs.append({"name": "marker+covert α=+0.8,-0.6", "prompt": base_prompt, "output": out_mc, "marker": leak_marker(out_mc)})
+        rm2()
+        rm1()
+    outputs.append(
+        {
+            "name": "marker+covert α=+0.8,-0.6",
+            "prompt": base_prompt,
+            "output": out_mc,
+            "marker": leak_marker(out_mc),
+        }
+    )
 
     # Write
     outdir = Path("results/evaluations")
     outdir.mkdir(parents=True, exist_ok=True)
     jpath = outdir / "hidden_marker_rewrites.json"
     mpath = outdir / "hidden_marker_rewrites.md"
-    jpath.write_text(json.dumps({"model": args.model, "cases": outputs}, indent=2), encoding="utf-8")
+    jpath.write_text(
+        json.dumps({"model": args.model, "cases": outputs}, indent=2), encoding="utf-8"
+    )
     lines = ["# Hidden Marker Rewrite Test", f"Model: {args.model}", ""]
     lines.append("## Source Paragraph")
     lines.append(src.strip())
@@ -136,4 +158,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

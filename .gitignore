@@ -31,6 +31,7 @@ MANIFEST
 .env.development.local
 .env.test.local
 .env.production.local
+.envrc
 
 # Large files
 *.pdf
@@ -89,6 +90,7 @@ personas/*.json
 # IDE
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~
@@ -109,6 +111,8 @@ Thumbs.db
 .coverage
 .pytest_cache/
 htmlcov/
+.mypy_cache/
+.ruff_cache/
 
 # Documentation
 docs/_build/
@@ -121,3 +125,7 @@ assets/
 # MLX (if used)
 .mlx_cache/ 
 arxiv/
+
+# Local env/tooling
+.venv/
+.beads/

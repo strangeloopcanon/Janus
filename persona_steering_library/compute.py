@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import pathlib
 from dataclasses import dataclass
-from typing import Sequence, TYPE_CHECKING, Any
+from typing import Any, Sequence, TYPE_CHECKING, cast
 
 import torch
 
@@ -25,7 +25,7 @@ if TYPE_CHECKING:  # pragma: no cover - type hints only
 
 # Optional MLX backend flag
 try:
-    from persona_steering_library import mlx_support  # noqa: WPS433  optional dependency
+    from persona_steering_library import mlx_support
 
     _HAS_MLX = True
 except ImportError:  # pragma: no cover – missing optional dep
@@ -63,14 +63,16 @@ class PersonaVectorResult:
         return cls(vector=vec, layer_idx=meta["layer_idx"], hidden_size=meta["hidden_size"])
 
 
-def _init_model_and_tokenizer(model_name: str, device: str, backend: str = "torch"):
+def _init_model_and_tokenizer(model_name: str, device: str | torch.device, backend: str = "torch"):
     if backend == "torch":
         # Lazy import to avoid hard dependency at module import time
         from transformers import AutoModelForCausalLM, AutoTokenizer  # type: ignore
 
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(model_name, output_hidden_states=True)
-        model.to(device)
+        model = cast(
+            Any, AutoModelForCausalLM.from_pretrained(model_name, output_hidden_states=True)
+        )
+        model.to(str(device))
         model.eval()
         return model, tokenizer
 
@@ -102,10 +104,11 @@ def _generate(
     """
 
     if backend == "torch":
-        pooled: list[torch.Tensor] = []
+        pooled_torch: list[torch.Tensor] = []
 
         # Lazy import to avoid global dependency
         from transformers import GenerationConfig  # type: ignore
+
         generation_config = GenerationConfig(
             max_new_tokens=max_new_tokens,
             do_sample=True,
@@ -134,11 +137,11 @@ def _generate(
             layer_hidden = out.hidden_states[pool_layer_idx][0]  # (seq, hidden)
             completion_hidden = layer_hidden[input_len:]
             mean_vec = completion_hidden.mean(dim=0)
-            pooled.append(mean_vec.cpu())
+            pooled_torch.append(mean_vec.cpu())
             if progress_every and (i % progress_every == 0 or i == total):
                 print(f"Torch gen/pooled {i}/{total} (layer {pool_layer_idx})", flush=True)
 
-        return pooled
+        return pooled_torch
 
     if backend == "mlx":
         if not _HAS_MLX:
@@ -151,10 +154,11 @@ def _generate(
             tok_encode,
             _get_components,
         )
+
         libs = mlx_support._lazy_import()  # type: ignore[attr-defined]
         mx = libs.mx
 
-        pooled: list[torch.Tensor] = []
+        pooled_mlx: list[torch.Tensor] = []
 
         total = len(prompts)
         for i, prompt in enumerate(prompts, 1):
@@ -182,15 +186,15 @@ def _generate(
                 k = pool_layer_idx if pool_layer_idx >= 0 else (len(layers) - 1)
             except Exception:
                 k = pool_layer_idx
-            logits, hidden = forward_with_hidden(model, ids, capture_layers=(k,))
+            _, hidden = forward_with_hidden(model, ids, capture_layers=(k,))
             h = hidden[k]  # [1, T, D]
             mean_mx = mean_hidden_over_span(h, start, end)  # [1, D]
             mean_t = torch.tensor(mean_mx.squeeze(0).tolist(), dtype=torch.float32)
-            pooled.append(mean_t)
+            pooled_mlx.append(mean_t)
             if progress_every and (i % progress_every == 0 or i == total):
                 print(f"MLX gen/pooled {i}/{total} (layer {pool_layer_idx})", flush=True)
 
-        return pooled
+        return pooled_mlx
 
     raise ValueError("Unknown backend")
 
@@ -226,7 +230,7 @@ def compute_persona_vector(
         "torch" (default) or "mlx" – controls which deep-learning stack is used.
     """
 
-    model, tokenizer = _init_model_and_tokenizer(model_name, device, backend)
+    model, tokenizer = _init_model_and_tokenizer(model_name, str(device), backend)
 
     # ───────────────────────────────── collect activations ──────────────────────────────────
     act_pos = _generate(

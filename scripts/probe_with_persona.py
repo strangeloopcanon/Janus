@@ -19,7 +19,9 @@ from pathlib import Path
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-import sys, os
+import sys
+import os
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from persona_steering_library import PersonaVectorResult, add_persona_hook  # type: ignore
 
@@ -59,10 +61,14 @@ def main() -> None:
     ap.add_argument("--temp", type=float, default=0.9)
     ap.add_argument("--top-p", type=float, default=0.9)
     ap.add_argument("--max-new-tokens", type=int, default=64)
-    ap.add_argument("--dtype", choices=["auto","fp32","fp16","bf16"], default="auto")
+    ap.add_argument("--dtype", choices=["auto", "fp32", "fp16", "bf16"], default="auto")
     args = ap.parse_args()
 
-    prompts = [ln.strip() for ln in Path(args.prompts).read_text(encoding="utf-8").splitlines() if ln.strip()]
+    prompts = [
+        ln.strip()
+        for ln in Path(args.prompts).read_text(encoding="utf-8").splitlines()
+        if ln.strip()
+    ]
     if args.limit and len(prompts) > args.limit:
         prompts = prompts[: args.limit]
 
@@ -70,10 +76,14 @@ def main() -> None:
     tok = AutoTokenizer.from_pretrained(args.model)
     mdl = AutoModelForCausalLM.from_pretrained(args.model)
     if args.dtype != "auto":
-        if args.dtype == "fp16": mdl = mdl.to(torch.float16)
-        elif args.dtype == "bf16": mdl = mdl.to(torch.bfloat16)
-        elif args.dtype == "fp32": mdl = mdl.to(torch.float32)
-    mdl.to(device); mdl.eval()
+        if args.dtype == "fp16":
+            mdl = mdl.to(torch.float16)
+        elif args.dtype == "bf16":
+            mdl = mdl.to(torch.bfloat16)
+        elif args.dtype == "fp32":
+            mdl = mdl.to(torch.float32)
+    mdl.to(device)
+    mdl.eval()
 
     persona = None
     if args.persona:
@@ -84,18 +94,52 @@ def main() -> None:
     with outp.open("w", encoding="utf-8") as fp:
         for i, prompt in enumerate(prompts):
             # base
-            base = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
-            fp.write(json.dumps({"index": i, "variant": "base", "prompt": prompt, "output": base}, ensure_ascii=False) + "\n")
+            base = generate(
+                mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens
+            )
+            fp.write(
+                json.dumps(
+                    {"index": i, "variant": "base", "prompt": prompt, "output": base},
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
             if persona is not None:
-                rm = add_persona_hook(mdl, persona.vector, layer_idx=persona.layer_idx, alpha=args.alpha)
+                rm = add_persona_hook(
+                    mdl, persona.vector, layer_idx=persona.layer_idx, alpha=args.alpha
+                )
                 try:
-                    steered = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
+                    steered = generate(
+                        mdl,
+                        tok,
+                        prompt,
+                        temp=args.temp,
+                        top_p=args.top_p,
+                        max_new=args.max_new_tokens,
+                    )
                 finally:
                     rm()
-                fp.write(json.dumps({"index": i, "variant": "steered", "prompt": prompt, "output": steered, "personas": [{"path": str(Path(args.persona)), "layer_idx": persona.layer_idx, "alpha": args.alpha}]}, ensure_ascii=False) + "\n")
+                fp.write(
+                    json.dumps(
+                        {
+                            "index": i,
+                            "variant": "steered",
+                            "prompt": prompt,
+                            "output": steered,
+                            "personas": [
+                                {
+                                    "path": str(Path(args.persona)),
+                                    "layer_idx": persona.layer_idx,
+                                    "alpha": args.alpha,
+                                }
+                            ],
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
     print(f"✓ Wrote {outp}")
 
 
 if __name__ == "__main__":
     main()
-

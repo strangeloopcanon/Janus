@@ -24,6 +24,7 @@ from __future__ import annotations
 # Ensure repo root is on sys.path when running as `python scripts/...`
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import argparse
@@ -31,7 +32,7 @@ import pathlib
 import random
 from typing import List
 
-from persona_steering_library import compute_persona_vector, PersonaVectorResult
+from persona_steering_library import compute_persona_vector
 import time
 
 try:
@@ -50,18 +51,31 @@ def _read_lines(path: pathlib.Path, limit: int | None = None, shuffle: bool = Tr
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Build and save a covertness persona vector from a dataset")
+    ap = argparse.ArgumentParser(
+        description="Build and save a covertness persona vector from a dataset"
+    )
     ap.add_argument("--model", required=True, help="HF model ID (e.g., Qwen/Qwen3-0.6B)")
     ap.add_argument("--backend", choices=["torch", "mlx"], default="torch")
-    ap.add_argument("--dataset-dir", default="examples/covert_dataset", help="Directory with covert_positives.txt and covert_negatives.txt")
+    ap.add_argument(
+        "--dataset-dir",
+        default="examples/covert_dataset",
+        help="Directory with covert_positives.txt and covert_negatives.txt",
+    )
     ap.add_argument("--positives", help="Optional explicit path to covert_positives.txt")
     ap.add_argument("--negatives", help="Optional explicit path to covert_negatives.txt")
     ap.add_argument("--layer-idx", type=int, default=-1)
     ap.add_argument("--max-new-tokens", type=int, default=96)
     ap.add_argument("--num", type=int, default=None, help="Optional cap on examples per set")
-    ap.add_argument("--out", default="personas/persona_covert_v2.json", help="Output JSON path for the vector")
+    ap.add_argument(
+        "--out", default="personas/persona_covert_v2.json", help="Output JSON path for the vector"
+    )
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--progress-every", type=int, default=50, help="Print progress every N prompts (per set); 0=off")
+    ap.add_argument(
+        "--progress-every",
+        type=int,
+        default=50,
+        help="Print progress every N prompts (per set); 0=off",
+    )
     args = ap.parse_args()
 
     random.seed(args.seed)
@@ -91,11 +105,14 @@ def main() -> None:
     print(
         f"Building covertness vector: backend={args.backend}"
         f" | layer_idx={args.layer_idx} | max_new_tokens={args.max_new_tokens}"
-        f" | pos={len(positives)} neg={len(negatives)}"
-        + (f" | device={device}" if device else "")
+        f" | pos={len(positives)} neg={len(negatives)}" + (f" | device={device}" if device else "")
     )
-    if (device == "cpu") and total_examples * max(1, args.max_new_tokens) > 2_0_0_0_0:  # ~large run on CPU
-        print("⚠️ CPU run detected with large workload; consider --num 50 or --max-new-tokens 32, or enable MPS (Apple Silicon).")
+    if (device == "cpu") and total_examples * max(
+        1, args.max_new_tokens
+    ) > 2_0_0_0_0:  # ~large run on CPU
+        print(
+            "⚠️ CPU run detected with large workload; consider --num 50 or --max-new-tokens 32, or enable MPS (Apple Silicon)."
+        )
 
     t0 = time.time()
     try:
@@ -111,7 +128,9 @@ def main() -> None:
         )
     except NotImplementedError:
         if args.backend == "mlx":
-            print("⚠️ MLX hidden-state path unavailable for this model; falling back to Torch for vector building.")
+            print(
+                "⚠️ MLX hidden-state path unavailable for this model; falling back to Torch for vector building."
+            )
             res = compute_persona_vector(
                 model_name=args.model,
                 positive_prompts=positives,
@@ -131,9 +150,11 @@ def main() -> None:
 
     dt = time.time() - t0
     print(f"✅ Saved covertness vector to {out_path}")
-    print(f"   layer_idx={res.layer_idx}, hidden_size={res.hidden_size}, norm={float(res.vector.norm().item()):.4f}")
+    print(
+        f"   layer_idx={res.layer_idx}, hidden_size={res.hidden_size}, norm={float(res.vector.norm().item()):.4f}"
+    )
     print("   Matching tensor saved as:", out_path.with_suffix(".pt"))
-    print(f"   Elapsed: {dt/60.0:.1f} min")
+    print(f"   Elapsed: {dt / 60.0:.1f} min")
 
 
 if __name__ == "__main__":

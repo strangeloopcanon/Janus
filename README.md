@@ -29,6 +29,18 @@ This toolkit is built around a few key ideas:
 
 ## Quick start
 
+### Development gates
+
+```bash
+# One-time setup
+make setup
+
+# Run contract gates
+make all
+```
+
+Copy `.env.example` to `.env` and set your own keys. Never commit `.env`.
+
 ### 🚀 Get Started Fast
 
 ```bash

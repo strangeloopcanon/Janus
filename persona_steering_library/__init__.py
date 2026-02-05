@@ -15,5 +15,8 @@ __all__ = [
     "PersonaVectorResult",
 ]
 
-from .compute import compute_persona_vector, PersonaVectorResult  # noqa: E402  pylint: disable=C0413
+from .compute import (
+    compute_persona_vector,
+    PersonaVectorResult,
+)  # noqa: E402  pylint: disable=C0413
 from .hooks import add_persona_hook  # noqa: E402  pylint: disable=C0413

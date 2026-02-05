@@ -35,7 +35,6 @@ import sys
 from typing import List
 
 import numpy as np
-import torch
 
 # Ensure repo root on path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -51,7 +50,9 @@ from persona_steering_library.mlx_support import (  # type: ignore
 )
 
 
-def collect_hidden(model, tok, prompts: List[str], *, layer_idx: int, max_new_tokens: int, progress_every: int = 50) -> np.ndarray:
+def collect_hidden(
+    model, tok, prompts: List[str], *, layer_idx: int, max_new_tokens: int, progress_every: int = 50
+) -> np.ndarray:
     libs = _lazy_import()
     mx = libs.mx
     rows: List[np.ndarray] = []
@@ -85,7 +86,15 @@ def collect_hidden(model, tok, prompts: List[str], *, layer_idx: int, max_new_to
     return np.stack(rows, axis=0)  # [N, D]
 
 
-def collect_hidden_forced(model, tok, prompts: List[str], completions: List[str], *, layer_idx: int, progress_every: int = 50) -> np.ndarray:
+def collect_hidden_forced(
+    model,
+    tok,
+    prompts: List[str],
+    completions: List[str],
+    *,
+    layer_idx: int,
+    progress_every: int = 50,
+) -> np.ndarray:
     """Collect pooled hiddens over a provided completion text (no generation).
 
     Both prompts and completions are strings; we encode using the model's tokenizer
@@ -125,16 +134,35 @@ def orthogonal_procrustes(Hs: np.ndarray, Ht: np.ndarray) -> np.ndarray:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Align spaces between two models (hidden or embeddings)")
+    ap = argparse.ArgumentParser(
+        description="Align spaces between two models (hidden or embeddings)"
+    )
     ap.add_argument("--src-model", required=True)
     ap.add_argument("--tgt-model", required=True)
-    ap.add_argument("--backend", default="mlx", choices=["mlx", "torch"], help="Backend to use for model loading and collection")
-    ap.add_argument("--mode", choices=["hidden", "embeddings", "subspace"], default="hidden", help="Alignment mode")
-    ap.add_argument("--layer-idx", type=int, default=-2, help="Layer for hidden mode; ignored for embeddings mode")
+    ap.add_argument(
+        "--backend",
+        default="mlx",
+        choices=["mlx", "torch"],
+        help="Backend to use for model loading and collection",
+    )
+    ap.add_argument(
+        "--mode",
+        choices=["hidden", "embeddings", "subspace"],
+        default="hidden",
+        help="Alignment mode",
+    )
+    ap.add_argument(
+        "--layer-idx",
+        type=int,
+        default=-2,
+        help="Layer for hidden mode; ignored for embeddings mode",
+    )
     ap.add_argument("--prompts", required=True, help="Text file with one prompt per line")
     ap.add_argument("--num", type=int, default=300, help="Max prompts to use")
     ap.add_argument("--max-new-tokens", type=int, default=64)
-    ap.add_argument("--progress-every", type=int, default=50, help="Heartbeat interval for hidden collection")
+    ap.add_argument(
+        "--progress-every", type=int, default=50, help="Heartbeat interval for hidden collection"
+    )
     ap.add_argument("--pca-k", type=int, default=512, help="Top-k PCs for subspace alignment")
     ap.add_argument("--out", required=True, help="Output path prefix (no extension)")
     args = ap.parse_args()
@@ -144,18 +172,37 @@ def main() -> None:
     if args.num and len(prompts) > args.num:
         prompts = prompts[: args.num]
 
-    print(f"Loading src={args.src_model} and tgt={args.tgt_model} (backend={args.backend}, mode={args.mode})")
+    print(
+        f"Loading src={args.src_model} and tgt={args.tgt_model} (backend={args.backend}, mode={args.mode})"
+    )
     if args.backend == "mlx":
         src_model, src_tok = load_model(args.src_model)
         tgt_model, tgt_tok = load_model(args.tgt_model)
     else:  # torch backend
         from transformers import AutoModelForCausalLM, AutoTokenizer  # type: ignore
         import torch  # type: ignore
-        device = "cuda" if torch.cuda.is_available() else ("mps" if hasattr(torch.backends, "mps") and torch.backends.mps.is_available() else "cpu")
+
+        device = (
+            "cuda"
+            if torch.cuda.is_available()
+            else (
+                "mps"
+                if hasattr(torch.backends, "mps") and torch.backends.mps.is_available()
+                else "cpu"
+            )
+        )
         src_tok = AutoTokenizer.from_pretrained(args.src_model)
         tgt_tok = AutoTokenizer.from_pretrained(args.tgt_model)
-        src_model = AutoModelForCausalLM.from_pretrained(args.src_model, output_hidden_states=True).to(device).eval()
-        tgt_model = AutoModelForCausalLM.from_pretrained(args.tgt_model, output_hidden_states=True).to(device).eval()
+        src_model = (
+            AutoModelForCausalLM.from_pretrained(args.src_model, output_hidden_states=True)
+            .to(device)
+            .eval()
+        )
+        tgt_model = (
+            AutoModelForCausalLM.from_pretrained(args.tgt_model, output_hidden_states=True)
+            .to(device)
+            .eval()
+        )
 
     if args.mode == "hidden":
         # 1) Generate source completions once
@@ -180,13 +227,18 @@ def main() -> None:
         else:
             from transformers import GenerationConfig  # type: ignore
             import torch  # type: ignore
-            gen_cfg = GenerationConfig(max_new_tokens=args.max_new_tokens, do_sample=True, top_p=0.9, temperature=1.0)
+
+            gen_cfg = GenerationConfig(
+                max_new_tokens=args.max_new_tokens, do_sample=True, top_p=0.9, temperature=1.0
+            )
             for i, prompt in enumerate(prompts, 1):
                 inputs = src_tok(prompt, return_tensors="pt")
                 inputs = {k: v.to(src_model.device) for k, v in inputs.items()}
                 input_len = inputs["input_ids"].shape[1]
                 with torch.no_grad():
-                    out = src_model.generate(**inputs, generation_config=gen_cfg, return_dict_in_generate=True)
+                    out = src_model.generate(
+                        **inputs, generation_config=gen_cfg, return_dict_in_generate=True
+                    )
                 comp = src_tok.decode(out.sequences[0, input_len:], skip_special_tokens=True)
                 src_completions.append(comp)
                 if args.progress_every and (i % args.progress_every == 0 or i == total):
@@ -196,36 +248,75 @@ def main() -> None:
         print("Collecting paired hiddens (source)…")
         if args.backend == "mlx":
             Hs = collect_hidden_forced(
-                src_model, src_tok, prompts, src_completions, layer_idx=args.layer_idx, progress_every=args.progress_every
+                src_model,
+                src_tok,
+                prompts,
+                src_completions,
+                layer_idx=args.layer_idx,
+                progress_every=args.progress_every,
             )
             print("Collecting paired hiddens (target)…")
             Ht = collect_hidden_forced(
-                tgt_model, tgt_tok, prompts, src_completions, layer_idx=args.layer_idx, progress_every=args.progress_every
+                tgt_model,
+                tgt_tok,
+                prompts,
+                src_completions,
+                layer_idx=args.layer_idx,
+                progress_every=args.progress_every,
             )
         else:
             # Torch versions
             import numpy as np  # type: ignore
             import torch  # type: ignore
-            def collect_hidden_forced_torch(model, tok, prompts: List[str], completions: List[str], *, layer_idx: int, progress_every: int = 50) -> np.ndarray:
+
+            def collect_hidden_forced_torch(
+                model,
+                tok,
+                prompts: List[str],
+                completions: List[str],
+                *,
+                layer_idx: int,
+                progress_every: int = 50,
+            ) -> np.ndarray:
                 rows: List[np.ndarray] = []
                 total = len(prompts)
                 k = layer_idx
                 for i, (prompt, completion) in enumerate(zip(prompts, completions), 1):
-                    p = tok(prompt, return_tensors="pt"); r = tok(completion, return_tensors="pt", add_special_tokens=False)
-                    p_ids = p["input_ids"].to(model.device); r_ids = r["input_ids"].to(model.device)
+                    p = tok(prompt, return_tensors="pt")
+                    r = tok(completion, return_tensors="pt", add_special_tokens=False)
+                    p_ids = p["input_ids"].to(model.device)
+                    r_ids = r["input_ids"].to(model.device)
                     full = torch.cat([p_ids, r_ids], dim=1)
                     with torch.no_grad():
                         out = model(full, output_hidden_states=True)
                     H = out.hidden_states[k][0]  # (T, D)
-                    start = p_ids.shape[1]; end = start + r_ids.shape[1]
+                    start = p_ids.shape[1]
+                    end = start + r_ids.shape[1]
                     mean = H[start:end].mean(dim=0).detach().cpu().numpy()
                     rows.append(mean)
                     if progress_every and (i % progress_every == 0 or i == total):
-                        print(f"Collected {i}/{total} forced hiddens (layer {layer_idx})", flush=True)
+                        print(
+                            f"Collected {i}/{total} forced hiddens (layer {layer_idx})", flush=True
+                        )
                 return np.stack(rows, axis=0)
-            Hs = collect_hidden_forced_torch(src_model, src_tok, prompts, src_completions, layer_idx=args.layer_idx, progress_every=args.progress_every)
+
+            Hs = collect_hidden_forced_torch(
+                src_model,
+                src_tok,
+                prompts,
+                src_completions,
+                layer_idx=args.layer_idx,
+                progress_every=args.progress_every,
+            )
             print("Collecting paired hiddens (target)…")
-            Ht = collect_hidden_forced_torch(tgt_model, tgt_tok, prompts, src_completions, layer_idx=args.layer_idx, progress_every=args.progress_every)
+            Ht = collect_hidden_forced_torch(
+                tgt_model,
+                tgt_tok,
+                prompts,
+                src_completions,
+                layer_idx=args.layer_idx,
+                progress_every=args.progress_every,
+            )
         # Upcast and standardize for numerical stability
         Hs = Hs.astype(np.float64)
         Ht = Ht.astype(np.float64)
@@ -245,7 +336,11 @@ def main() -> None:
         std_median_tgt = float(np.median(Ht_std))
         gamma = float(std_median_tgt / (std_median_src + 1e-12))
         save_payload = {"R": R.astype(np.float32)}
-        extra_meta = {"std_median_src": std_median_src, "std_median_tgt": std_median_tgt, "gamma": gamma}
+        extra_meta = {
+            "std_median_src": std_median_src,
+            "std_median_tgt": std_median_tgt,
+            "gamma": gamma,
+        }
     elif args.mode == "subspace":
         # Paired completions, then PCA on standardized features and Procrustes on subspaces
         print("Generating source completions for paired subspace alignment…")
@@ -269,13 +364,18 @@ def main() -> None:
         else:
             from transformers import GenerationConfig  # type: ignore
             import torch  # type: ignore
-            gen_cfg = GenerationConfig(max_new_tokens=args.max_new_tokens, do_sample=True, top_p=0.9, temperature=1.0)
+
+            gen_cfg = GenerationConfig(
+                max_new_tokens=args.max_new_tokens, do_sample=True, top_p=0.9, temperature=1.0
+            )
             for i, prompt in enumerate(prompts, 1):
                 inputs = src_tok(prompt, return_tensors="pt")
                 inputs = {k: v.to(src_model.device) for k, v in inputs.items()}
                 input_len = inputs["input_ids"].shape[1]
                 with torch.no_grad():
-                    out = src_model.generate(**inputs, generation_config=gen_cfg, return_dict_in_generate=True)
+                    out = src_model.generate(
+                        **inputs, generation_config=gen_cfg, return_dict_in_generate=True
+                    )
                 comp = src_tok.decode(out.sequences[0, input_len:], skip_special_tokens=True)
                 src_completions.append(comp)
                 if args.progress_every and (i % args.progress_every == 0 or i == total):
@@ -283,32 +383,75 @@ def main() -> None:
 
         print("Collecting paired hiddens (source)…")
         if args.backend == "mlx":
-            Hs = collect_hidden_forced(src_model, src_tok, prompts, src_completions, layer_idx=args.layer_idx, progress_every=args.progress_every)
+            Hs = collect_hidden_forced(
+                src_model,
+                src_tok,
+                prompts,
+                src_completions,
+                layer_idx=args.layer_idx,
+                progress_every=args.progress_every,
+            )
             print("Collecting paired hiddens (target)…")
-            Ht = collect_hidden_forced(tgt_model, tgt_tok, prompts, src_completions, layer_idx=args.layer_idx, progress_every=args.progress_every)
+            Ht = collect_hidden_forced(
+                tgt_model,
+                tgt_tok,
+                prompts,
+                src_completions,
+                layer_idx=args.layer_idx,
+                progress_every=args.progress_every,
+            )
         else:
             import numpy as np  # type: ignore
             import torch  # type: ignore
-            def collect_hidden_forced_torch(model, tok, prompts: List[str], completions: List[str], *, layer_idx: int, progress_every: int = 50) -> np.ndarray:
+
+            def collect_hidden_forced_torch(
+                model,
+                tok,
+                prompts: List[str],
+                completions: List[str],
+                *,
+                layer_idx: int,
+                progress_every: int = 50,
+            ) -> np.ndarray:
                 rows: List[np.ndarray] = []
                 total = len(prompts)
                 k = layer_idx
                 for i, (prompt, completion) in enumerate(zip(prompts, completions), 1):
-                    p = tok(prompt, return_tensors="pt"); r = tok(completion, return_tensors="pt", add_special_tokens=False)
-                    p_ids = p["input_ids"].to(model.device); r_ids = r["input_ids"].to(model.device)
+                    p = tok(prompt, return_tensors="pt")
+                    r = tok(completion, return_tensors="pt", add_special_tokens=False)
+                    p_ids = p["input_ids"].to(model.device)
+                    r_ids = r["input_ids"].to(model.device)
                     full = torch.cat([p_ids, r_ids], dim=1)
                     with torch.no_grad():
                         out = model(full, output_hidden_states=True)
                     H = out.hidden_states[k][0]  # (T, D)
-                    start = p_ids.shape[1]; end = start + r_ids.shape[1]
+                    start = p_ids.shape[1]
+                    end = start + r_ids.shape[1]
                     mean = H[start:end].mean(dim=0).detach().cpu().numpy()
                     rows.append(mean)
                     if progress_every and (i % progress_every == 0 or i == total):
-                        print(f"Collected {i}/{total} forced hiddens (layer {layer_idx})", flush=True)
+                        print(
+                            f"Collected {i}/{total} forced hiddens (layer {layer_idx})", flush=True
+                        )
                 return np.stack(rows, axis=0)
-            Hs = collect_hidden_forced_torch(src_model, src_tok, prompts, src_completions, layer_idx=args.layer_idx, progress_every=args.progress_every)
+
+            Hs = collect_hidden_forced_torch(
+                src_model,
+                src_tok,
+                prompts,
+                src_completions,
+                layer_idx=args.layer_idx,
+                progress_every=args.progress_every,
+            )
             print("Collecting paired hiddens (target)…")
-            Ht = collect_hidden_forced_torch(tgt_model, tgt_tok, prompts, src_completions, layer_idx=args.layer_idx, progress_every=args.progress_every)
+            Ht = collect_hidden_forced_torch(
+                tgt_model,
+                tgt_tok,
+                prompts,
+                src_completions,
+                layer_idx=args.layer_idx,
+                progress_every=args.progress_every,
+            )
 
         Hs = Hs.astype(np.float64)
         Ht = Ht.astype(np.float64)
@@ -334,7 +477,7 @@ def main() -> None:
         print(f"Subspace dims: src D={Hs.shape[1]}, tgt D={Ht.shape[1]}, k={kmax}")
         Cs = Hs_z @ Us  # (N x k)
         Ct = Ht_z @ Ut  # (N x k)
-        S = Cs.T @ Ct    # (k x k)
+        S = Cs.T @ Ct  # (k x k)
         Uq, _, Vqt = np.linalg.svd(S, full_matrices=False)
         M = Uq @ Vqt  # (k x k)
         # Fit quality in coefficient space
@@ -344,8 +487,17 @@ def main() -> None:
         std_median_src = float(np.median(Hs_std))
         std_median_tgt = float(np.median(Ht_std))
         gamma = float(std_median_tgt / (std_median_src + 1e-12))
-        save_payload = {"Us": Us.astype(np.float32), "Ut": Ut.astype(np.float32), "M": M.astype(np.float32)}
-        extra_meta = {"std_median_src": std_median_src, "std_median_tgt": std_median_tgt, "gamma": gamma, "pca_k": int(kmax)}
+        save_payload = {
+            "Us": Us.astype(np.float32),
+            "Ut": Ut.astype(np.float32),
+            "M": M.astype(np.float32),
+        }
+        extra_meta = {
+            "std_median_src": std_median_src,
+            "std_median_tgt": std_median_tgt,
+            "gamma": gamma,
+            "pca_k": int(kmax),
+        }
     else:  # embeddings mode
         # Attempt to get vocab and embed weights; require tokenizers with get_vocab
         if not hasattr(src_tok, "get_vocab") or not hasattr(tgt_tok, "get_vocab"):
@@ -361,21 +513,25 @@ def main() -> None:
             mx = libs.mx
             src_embed, _, _, _ = _get_components(src_model)
             tgt_embed, _, _, _ = _get_components(tgt_model)
+
             def rows_for(tokens, tok, embed):
                 ids = [tok.get_vocab()[t] for t in tokens]
                 arr = mx.array(ids, dtype=mx.int32)
                 em = embed(arr)
                 return np.asarray(em)
+
             Hs = rows_for(shared_tokens, src_tok, src_embed).astype(np.float64)
             Ht = rows_for(shared_tokens, tgt_tok, tgt_embed).astype(np.float64)
         else:
             import numpy as np  # type: ignore
             import torch  # type: ignore
+
             def rows_for_torch(tokens, tok, model):
                 ids = [tok.get_vocab()[t] for t in tokens]
                 ids_t = torch.tensor(ids, dtype=torch.long, device=model.device)
                 emb = model.get_input_embeddings()(ids_t).detach().cpu().numpy()
                 return emb
+
             Hs = rows_for_torch(shared_tokens, src_tok, src_model).astype(np.float64)
             Ht = rows_for_torch(shared_tokens, tgt_tok, tgt_model).astype(np.float64)
         Hs_mu = Hs.mean(axis=0, keepdims=True)
@@ -392,7 +548,11 @@ def main() -> None:
         std_median_tgt = float(np.median(Ht_std))
         gamma = float(std_median_tgt / (std_median_src + 1e-12))
         save_payload = {"R": R.astype(np.float32)}
-        extra_meta = {"std_median_src": std_median_src, "std_median_tgt": std_median_tgt, "gamma": gamma}
+        extra_meta = {
+            "std_median_src": std_median_src,
+            "std_median_tgt": std_median_tgt,
+            "gamma": gamma,
+        }
 
     # Save
     npz_path = args.out + ".npz"

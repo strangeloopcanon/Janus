@@ -15,12 +15,12 @@ from __future__ import annotations
 # Ensure repo root is on sys.path when running as `python scripts/...`
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import argparse
 import json
 from pathlib import Path
-from typing import List
 
 import torch
 from torch import nn
@@ -53,8 +53,12 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Train linear-probe covertness detector")
     ap.add_argument("--model", required=True, help="HF model ID for hidden states")
     ap.add_argument("--data", required=True, help="JSONL with {text/response, label}")
-    ap.add_argument("--out", required=True, help="Output basename (e.g., detectors/covert_detector.json)")
-    ap.add_argument("--layer-idx", type=int, default=-1, help="Layer index for pooling hidden states")
+    ap.add_argument(
+        "--out", required=True, help="Output basename (e.g., detectors/covert_detector.json)"
+    )
+    ap.add_argument(
+        "--layer-idx", type=int, default=-1, help="Layer index for pooling hidden states"
+    )
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--batch-size", type=int, default=16)
     ap.add_argument("--lr", type=float, default=1e-2)
@@ -86,7 +90,9 @@ def main() -> None:
             feats = []
             with torch.no_grad():
                 for text in texts:
-                    ids = tok(text, return_tensors="pt", add_special_tokens=False)["input_ids"].to(device)
+                    ids = tok(text, return_tensors="pt", add_special_tokens=False)["input_ids"].to(
+                        device
+                    )
                     out = mdl(ids, output_hidden_states=True)
                     h = out.hidden_states[args.layer_idx][0].mean(dim=0)  # (hidden,)
                     feats.append(h)
@@ -98,12 +104,16 @@ def main() -> None:
             loss.backward()
             optim.step()
             total += float(loss.item()) * X.size(0)
-        print(f"epoch={epoch+1} loss={total/len(ds):.4f}")
+        print(f"epoch={epoch + 1} loss={total / len(ds):.4f}")
 
     # Save
     out_json = Path(args.out)
     out_json.parent.mkdir(parents=True, exist_ok=True)
-    meta = {"layer_idx": args.layer_idx, "hidden_size": hidden_size, "bias": float(b.detach().cpu().item())}
+    meta = {
+        "layer_idx": args.layer_idx,
+        "hidden_size": hidden_size,
+        "bias": float(b.detach().cpu().item()),
+    }
     with out_json.open("w", encoding="utf-8") as fp:
         json.dump(meta, fp)
     torch.save(w.detach().cpu(), out_json.with_suffix(".pt"))

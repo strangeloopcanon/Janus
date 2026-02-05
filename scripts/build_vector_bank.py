@@ -30,6 +30,7 @@ from __future__ import annotations
 # Ensure repo root is on sys.path when running as `python scripts/...`
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import argparse
@@ -45,7 +46,7 @@ try:
 except Exception:  # pragma: no cover
     torch = None  # type: ignore
 
-from persona_steering_library import compute_persona_vector, PersonaVectorResult
+from persona_steering_library import compute_persona_vector
 
 
 # ── Traits and prompt templates ───────────────────────────────────────────────
@@ -158,7 +159,9 @@ TRAIT_ALIASES = {
 }
 
 
-def build_prompts(pos_t: List[str], neg_t: List[str], n: int, *, seed: int) -> Tuple[List[str], List[str]]:
+def build_prompts(
+    pos_t: List[str], neg_t: List[str], n: int, *, seed: int
+) -> Tuple[List[str], List[str]]:
     rnd = random.Random(seed)
     positives, negatives = [], []
     i = 0
@@ -199,18 +202,40 @@ def _sha1_of_lists(a: List[str], b: List[str]) -> str:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Build a multi-trait, multi-layer activation vector bank")
-    ap.add_argument("--model", required=True, help="HF model ID (e.g., Qwen/Qwen3-4B-Instruct-2507)")
+    ap = argparse.ArgumentParser(
+        description="Build a multi-trait, multi-layer activation vector bank"
+    )
+    ap.add_argument(
+        "--model", required=True, help="HF model ID (e.g., Qwen/Qwen3-4B-Instruct-2507)"
+    )
     ap.add_argument("--backend", choices=["torch", "mlx"], default="mlx")
-    ap.add_argument("--last-n-layers", type=int, default=4, help="Sweep the last N layers per trait")
-    ap.add_argument("--traits", nargs="*", default=list(trait_templates().keys()), help="Subset of trait keys to build")
+    ap.add_argument(
+        "--last-n-layers", type=int, default=4, help="Sweep the last N layers per trait"
+    )
+    ap.add_argument(
+        "--traits",
+        nargs="*",
+        default=list(trait_templates().keys()),
+        help="Subset of trait keys to build",
+    )
     ap.add_argument("--num", type=int, default=200, help="Prompts per set per trait")
     ap.add_argument("--max-new-tokens", type=int, default=48)
     ap.add_argument("--outdir", default="personas", help="Where to write persona_*.json/.pt files")
-    ap.add_argument("--manifest", default="personas/vector_bank_manifest.json", help="Manifest JSON path")
-    ap.add_argument("--skip-existing", action="store_true", help="Skip recomputing vectors if persona files already exist")
+    ap.add_argument(
+        "--manifest", default="personas/vector_bank_manifest.json", help="Manifest JSON path"
+    )
+    ap.add_argument(
+        "--skip-existing",
+        action="store_true",
+        help="Skip recomputing vectors if persona files already exist",
+    )
     ap.add_argument("--seed", type=int, default=1337)
-    ap.add_argument("--progress-every", type=int, default=50, help="Print progress every N samples per set; 0=off")
+    ap.add_argument(
+        "--progress-every",
+        type=int,
+        default=50,
+        help="Print progress every N samples per set; 0=off",
+    )
     args = ap.parse_args()
 
     outdir = Path(args.outdir)
@@ -304,7 +329,9 @@ def main() -> None:
                 )
             except NotImplementedError:
                 if args.backend == "mlx":
-                    print("⚠️ MLX hidden-state path unavailable for this model; falling back to Torch.")
+                    print(
+                        "⚠️ MLX hidden-state path unavailable for this model; falling back to Torch."
+                    )
                     res = compute_persona_vector(
                         model_name=args.model,
                         positive_prompts=pos,
@@ -323,7 +350,7 @@ def main() -> None:
             res.save(jpath)
             dt = time.time() - t0
             print(
-                f"   ✓ saved {jpath.name} | norm={float(res.vector.norm().item()):.4f} | hidden={res.hidden_size} | {dt/60.0:.1f} min"
+                f"   ✓ saved {jpath.name} | norm={float(res.vector.norm().item()):.4f} | hidden={res.hidden_size} | {dt / 60.0:.1f} min"
             )
 
             run["entries"].append(

@@ -18,6 +18,7 @@ from __future__ import annotations
 # Ensure repo root is on sys.path when running as `python scripts/...`
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import argparse
@@ -26,7 +27,6 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
-from transformers import AutoTokenizer
 
 
 def read_jsonl(path: Path) -> List[dict]:
@@ -49,12 +49,16 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="GSPO training with MLX (sequence-level)")
     ap.add_argument("--model", required=True, help="HF model ID (weights will be loaded in MLX)")
     ap.add_argument("--data", required=True, help="JSONL from generate_rewrite_groups.py")
-    ap.add_argument("--output", required=True, help="Directory to save MLX-trained model (adapter or full)")
+    ap.add_argument(
+        "--output", required=True, help="Directory to save MLX-trained model (adapter or full)"
+    )
     ap.add_argument("--lr", type=float, default=1e-5)
     ap.add_argument("--clip-eps", type=float, default=0.2)
     ap.add_argument("--kl-coeff", type=float, default=0.05)
     ap.add_argument("--epochs", type=int, default=1)
-    ap.add_argument("--batch-size", type=int, default=1, help="Batching depends on your MLX model interface")
+    ap.add_argument(
+        "--batch-size", type=int, default=1, help="Batching depends on your MLX model interface"
+    )
     args = ap.parse_args()
 
     # Lazy MLX imports
@@ -82,7 +86,7 @@ def main() -> None:
         logits_np, _ = mlx_support.forward_with_hidden(model, ids_np)
         # Shift and gather logprobs for response tokens
         # logits: (1, T, V)
-        T = logits_np.shape[1]
+        logits_np.shape[1]
         labels = ids_np[:, 1:]
         logits_shift = logits_np[:, :-1, :]
         # Convert to mx for stable log-softmax and gather
@@ -137,7 +141,9 @@ def main() -> None:
                     "Your MLX model must expose .parameters() compatible with mlx.optimizers."
                 )
             opt.update(params, grads)
-            print(f"epoch={epoch+1} step={i//max(1,args.batch_size)+1} loss={loss.item():.4f}")
+            print(
+                f"epoch={epoch + 1} step={i // max(1, args.batch_size) + 1} loss={loss.item():.4f}"
+            )
 
     out_dir = Path(args.output)
     out_dir.mkdir(parents=True, exist_ok=True)

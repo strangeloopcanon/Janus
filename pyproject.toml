@@ -1,0 +1,26 @@
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_ignores = false
+warn_redundant_casts = false
+show_error_codes = true
+files = ["persona_steering_library"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --disable-warnings --maxfail=1"
+testpaths = ["tests"]
+markers = [
+  "llm_live: tests that hit live model providers with staging keys",
+  "rollback: rollback plan verification tests",
+]

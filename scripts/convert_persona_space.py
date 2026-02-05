@@ -47,10 +47,14 @@ def main() -> None:
     with open(args.alignment_meta, "r", encoding="utf-8") as fp:
         meta = json.load(fp)
     d_src = int(meta["dims"]["src"]) if isinstance(meta.get("dims"), dict) else None
-    d_tgt = int(meta["dims"]["tgt"]) if isinstance(meta.get("dims"), dict) else None
+    int(meta["dims"]["tgt"]) if isinstance(meta.get("dims"), dict) else None
     tgt_model = meta.get("tgt_model")
-    layer_idx = args.tgt_layer_idx if args.tgt_layer_idx is not None else int(meta.get("layer_idx", src.layer_idx))
-    gamma = float(meta.get("gamma", 1.0))
+    layer_idx = (
+        args.tgt_layer_idx
+        if args.tgt_layer_idx is not None
+        else int(meta.get("layer_idx", src.layer_idx))
+    )
+    float(meta.get("gamma", 1.0))
 
     # Validate dims
     if d_src is not None and src.hidden_size != d_src:
@@ -60,23 +64,27 @@ def main() -> None:
     if use_subspace:
         Us = npz["Us"]  # [d_src, k]
         Ut = npz["Ut"]  # [d_tgt, k]
-        M = npz["M"]    # [k, k]
+        M = npz["M"]  # [k, k]
         if Us.shape[0] != v_src.shape[0]:
             raise ValueError(f"Subspace expects src dim {Us.shape[0]}, got {v_src.shape[0]}")
         v_hat = v_src / (np.linalg.norm(v_src) + 1e-12)
-        coeffs = Us.T @ v_hat         # [k]
-        mapped = M @ coeffs           # [k]
-        v_tgt = Ut @ mapped           # [d_tgt]
+        coeffs = Us.T @ v_hat  # [k]
+        mapped = M @ coeffs  # [k]
+        v_tgt = Ut @ mapped  # [d_tgt]
     else:
         if R is None:
             raise ValueError("Alignment npz missing R and subspace components")
         if R.shape[0] != v_src.shape[0]:
             raise ValueError(f"Alignment expects src dim {R.shape[0]}, got {v_src.shape[0]}")
-        v_tgt = R.T @ v_src           # [d_tgt]
+        v_tgt = R.T @ v_src  # [d_tgt]
     # Optional magnitude scaling factor from alignment statistics (can also be absorbed into alpha)
     v_tgt = v_tgt / (np.linalg.norm(v_tgt) + 1e-12)
 
-    out = PersonaVectorResult(vector=torch.tensor(v_tgt, dtype=torch.float32), layer_idx=layer_idx, hidden_size=int(v_tgt.shape[0]))
+    out = PersonaVectorResult(
+        vector=torch.tensor(v_tgt, dtype=torch.float32),
+        layer_idx=layer_idx,
+        hidden_size=int(v_tgt.shape[0]),
+    )
     out.save(args.out)
 
     # Patch model tag if available

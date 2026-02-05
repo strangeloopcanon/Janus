@@ -25,13 +25,14 @@ import argparse
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Sequence, Tuple
+from typing import Dict, Iterable, List, Sequence
 
 import numpy as np
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sys as _sys
+
 _sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from persona_steering_library import PersonaVectorResult  # type: ignore
 
@@ -67,7 +68,9 @@ class Pooled:
     vec: torch.Tensor  # (hidden,)
 
 
-def pool_hidden(mdl, tok, prompt: str, output: str, layers: Sequence[int], *, max_input_tokens: int) -> List[Pooled]:
+def pool_hidden(
+    mdl, tok, prompt: str, output: str, layers: Sequence[int], *, max_input_tokens: int
+) -> List[Pooled]:
     p = tok(prompt, return_tensors="pt")
     r = tok(output, return_tensors="pt", add_special_tokens=False)
     p_ids = p["input_ids"]
@@ -119,7 +122,9 @@ def main() -> None:
     ap.add_argument("--model", required=True)
     ap.add_argument("--dataset-a", required=True)
     ap.add_argument("--dataset-b", required=True)
-    ap.add_argument("--layers", default="-3,-2,-1", help="Comma-separated layer indices (e.g., -3,-2,-1)")
+    ap.add_argument(
+        "--layers", default="-3,-2,-1", help="Comma-separated layer indices (e.g., -3,-2,-1)"
+    )
     ap.add_argument(
         "--combine",
         choices=["none", "sum", "zsum"],
@@ -130,7 +135,9 @@ def main() -> None:
     ap.add_argument("--max-input-tokens", type=int, default=512)
     ap.add_argument("--dtype", choices=["auto", "fp32", "fp16", "bf16"], default="auto")
     ap.add_argument("--progress-every", type=int, default=50)
-    ap.add_argument("--export-readout", default=None, help="Optional path to save best layer readout vector")
+    ap.add_argument(
+        "--export-readout", default=None, help="Optional path to save best layer readout vector"
+    )
     args = ap.parse_args()
 
     layers = [int(x.strip()) for x in args.layers.split(",") if x.strip()]
@@ -145,9 +152,12 @@ def main() -> None:
             mdl = mdl.to(torch.bfloat16)
         elif args.dtype == "fp32":
             mdl = mdl.to(torch.float32)
-    mdl.to(device); mdl.eval()
+    mdl.to(device)
+    mdl.eval()
 
-    print(f"[init] device={device}, dtype={args.dtype}, limit={args.limit}, max_input={args.max_input_tokens}")
+    print(
+        f"[init] device={device}, dtype={args.dtype}, limit={args.limit}, max_input={args.max_input_tokens}"
+    )
 
     pa = Path(args.dataset_a)
     pb = Path(args.dataset_b)
@@ -162,7 +172,9 @@ def main() -> None:
         output = (ex.get("output") or "").strip()
         if not output:
             continue
-        for pooled in pool_hidden(mdl, tok, prompt, output, layers, max_input_tokens=args.max_input_tokens):
+        for pooled in pool_hidden(
+            mdl, tok, prompt, output, layers, max_input_tokens=args.max_input_tokens
+        ):
             A_by_layer[pooled.layer].append(pooled.vec.detach().cpu())
         if args.progress_every and i % args.progress_every == 0:
             print(f"[progress] A {i}")
@@ -173,7 +185,9 @@ def main() -> None:
         output = (ex.get("output") or "").strip()
         if not output:
             continue
-        for pooled in pool_hidden(mdl, tok, prompt, output, layers, max_input_tokens=args.max_input_tokens):
+        for pooled in pool_hidden(
+            mdl, tok, prompt, output, layers, max_input_tokens=args.max_input_tokens
+        ):
             B_by_layer[pooled.layer].append(pooled.vec.detach().cpu())
         if args.progress_every and i % args.progress_every == 0:
             print(f"[progress] B {i}")
@@ -233,6 +247,7 @@ def main() -> None:
             if args.combine == "zsum":
                 # z-score per layer using pooled std over A∪B
                 import numpy as _np
+
                 all_scores = _np.array(sA + sB, dtype=_np.float64)
                 mu = float(all_scores.mean())
                 sd = float(all_scores.std()) or 1.0
@@ -252,18 +267,21 @@ def main() -> None:
             n = min(len(SA), len(SB))
             diffs = [SB[i] - SA[i] for i in range(n)]
             import numpy as _np
+
             d_mean = float(_np.mean(diffs)) if diffs else 0.0
             d_std = float(_np.std(diffs)) if diffs else 0.0
             eff = (d_mean / d_std) if d_std > 0 else 0.0
             print("== combined probe:")
-            print({
-                "combine": args.combine,
-                "layers": layers,
-                "auc": float(auc_val),
-                "paired_delta_mean": float(d_mean),
-                "paired_delta_std": float(d_std),
-                "effect_size": float(eff),
-            })
+            print(
+                {
+                    "combine": args.combine,
+                    "layers": layers,
+                    "auc": float(auc_val),
+                    "paired_delta_mean": float(d_mean),
+                    "paired_delta_std": float(d_std),
+                    "effect_size": float(eff),
+                }
+            )
 
     # Optional export of best layer readout
     if args.export_readout and best is not None:

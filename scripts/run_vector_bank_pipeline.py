@@ -28,11 +28,12 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
-from pathlib import Path
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Build+Calibrate+Summarize vector bank with resume support")
+    ap = argparse.ArgumentParser(
+        description="Build+Calibrate+Summarize vector bank with resume support"
+    )
     # Build args
     ap.add_argument("--model", required=True)
     ap.add_argument("--backend", choices=["mlx", "torch"], default="mlx")
@@ -87,7 +88,9 @@ def main() -> None:
     subprocess.check_call(build_cmd)
 
     # 2) Calibrate
-    alpha_grid_str = args.alpha_grid if isinstance(args.alpha_grid, str) else ",".join(args.alpha_grid)
+    alpha_grid_str = (
+        args.alpha_grid if isinstance(args.alpha_grid, str) else ",".join(args.alpha_grid)
+    )
     calib_cmd = [
         sys.executable,
         "scripts/calibrate_alpha.py",

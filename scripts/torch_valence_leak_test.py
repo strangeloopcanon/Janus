@@ -19,7 +19,7 @@ import sys
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -37,7 +37,9 @@ def best_device() -> str:
     return "cpu"
 
 
-def generate(mdl, tok, prompt: str, max_new: int = 72, temp: float = 0.65, top_p: float = 0.9) -> str:
+def generate(
+    mdl, tok, prompt: str, max_new: int = 72, temp: float = 0.65, top_p: float = 0.9
+) -> str:
     inputs = tok(prompt, return_tensors="pt")
     inputs = {k: v.to(mdl.device) for k, v in inputs.items()}
     input_len = inputs["input_ids"].shape[1]
@@ -107,12 +109,14 @@ def main() -> None:
             for p in prompts:
                 out = generate(mdl, tok, p)
                 flags = leak_flags(out)
-                results["valence_only"].append({
-                    "alpha_valence": a,
-                    "prompt": p,
-                    "output": out,
-                    "flags": flags,
-                })
+                results["valence_only"].append(
+                    {
+                        "alpha_valence": a,
+                        "prompt": p,
+                        "output": out,
+                        "flags": flags,
+                    }
+                )
         finally:
             rm()
 
@@ -125,15 +129,18 @@ def main() -> None:
                 for p in prompts:
                     out = generate(mdl, tok, p)
                     flags = leak_flags(out)
-                    results["valence_plus_covert"].append({
-                        "alpha_valence": a_v,
-                        "alpha_covert": a_c,
-                        "prompt": p,
-                        "output": out,
-                        "flags": flags,
-                    })
+                    results["valence_plus_covert"].append(
+                        {
+                            "alpha_valence": a_v,
+                            "alpha_covert": a_c,
+                            "prompt": p,
+                            "output": out,
+                            "flags": flags,
+                        }
+                    )
             finally:
-                rm2(); rm1()
+                rm2()
+                rm1()
 
     # Write outputs
     outdir = Path("results/evaluations")
@@ -186,4 +193,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
