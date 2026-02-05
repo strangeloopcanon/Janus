@@ -18,7 +18,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import re
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
@@ -63,7 +62,9 @@ def infer_N(summary: Dict) -> Optional[int]:
     return None
 
 
-def bootstrap_ci_from_per_sample(per_sample_path: Path, *, B: int = 20000, seed: int = 0) -> Optional[Tuple[float, float]]:
+def bootstrap_ci_from_per_sample(
+    per_sample_path: Path, *, B: int = 20000, seed: int = 0
+) -> Optional[Tuple[float, float]]:
     try:
         d = json.loads(per_sample_path.read_text(encoding="utf-8"))
         deltas = np.array(d.get("proj_delta", []), dtype=np.float64)
@@ -81,7 +82,9 @@ def bootstrap_ci_from_per_sample(per_sample_path: Path, *, B: int = 20000, seed:
         return None
 
 
-def permutation_p_from_per_sample(per_sample_path: Path, *, iters: int = 20000, seed: int = 0) -> Optional[float]:
+def permutation_p_from_per_sample(
+    per_sample_path: Path, *, iters: int = 20000, seed: int = 0
+) -> Optional[float]:
     try:
         d = json.loads(per_sample_path.read_text(encoding="utf-8"))
         A = d.get("proj_A")
@@ -125,14 +128,46 @@ def main() -> None:
     outp.parent.mkdir(parents=True, exist_ok=True)
 
     entries = [
-        ("Teacher: Paranoid vs Base", newest_match(str(ed / "impact_proxy_ccnews_paranoid_dataset_readout_vs_base_4B.json")), None),
-        ("Teacher: Rule-defiant vs Base", newest_match(str(ed / "impact_proxy_ccnews_ruledef_dataset_readout_vs_base_4B.json")), None),
-        ("Teacher: Trusting vs Base (paranoid)", newest_match(str(ed / "impact_proxy_ccnews_trusting_dataset_readout_vs_base_4B.json")), None),
-        ("Student (single readout): Paranoid", newest_match(str(ed / "impact_proxy_student_paranoid_vs_base_eval*.json")), None),
-        ("Student (single readout): Rule-defiant", newest_match(str(ed / "impact_proxy_student_rule_defiant_vs_base_eval*.json")), None),
-        ("Student (single readout): Control", newest_match(str(ed / "impact_proxy_student_base_vs_base_eval*.json")), None),
-        ("Student (combined zsum): Paranoid", newest_match(str(ed / "impact_proxy_student_paranoid_combined_eval*.json")), Path("results/evaluations/student_paranoid_combined_per_sample.json")),
-        ("Student (combined zsum): Rule-defiant", newest_match(str(ed / "impact_proxy_student_ruledef_combined_eval*.json")), Path("results/evaluations/student_ruledef_combined_per_sample.json")),
+        (
+            "Teacher: Paranoid vs Base",
+            newest_match(str(ed / "impact_proxy_ccnews_paranoid_dataset_readout_vs_base_4B.json")),
+            None,
+        ),
+        (
+            "Teacher: Rule-defiant vs Base",
+            newest_match(str(ed / "impact_proxy_ccnews_ruledef_dataset_readout_vs_base_4B.json")),
+            None,
+        ),
+        (
+            "Teacher: Trusting vs Base (paranoid)",
+            newest_match(str(ed / "impact_proxy_ccnews_trusting_dataset_readout_vs_base_4B.json")),
+            None,
+        ),
+        (
+            "Student (single readout): Paranoid",
+            newest_match(str(ed / "impact_proxy_student_paranoid_vs_base_eval*.json")),
+            None,
+        ),
+        (
+            "Student (single readout): Rule-defiant",
+            newest_match(str(ed / "impact_proxy_student_rule_defiant_vs_base_eval*.json")),
+            None,
+        ),
+        (
+            "Student (single readout): Control",
+            newest_match(str(ed / "impact_proxy_student_base_vs_base_eval*.json")),
+            None,
+        ),
+        (
+            "Student (combined zsum): Paranoid",
+            newest_match(str(ed / "impact_proxy_student_paranoid_combined_eval*.json")),
+            Path("results/evaluations/student_paranoid_combined_per_sample.json"),
+        ),
+        (
+            "Student (combined zsum): Rule-defiant",
+            newest_match(str(ed / "impact_proxy_student_ruledef_combined_eval*.json")),
+            Path("results/evaluations/student_ruledef_combined_per_sample.json"),
+        ),
     ]
 
     rows = []
@@ -150,20 +185,24 @@ def main() -> None:
         if per_sample and per_sample.exists():
             ci = bootstrap_ci_from_per_sample(per_sample)
             pval = permutation_p_from_per_sample(per_sample)
-        rows.append({
-            "label": label,
-            "N": N,
-            "proj_mean": float(proj.get("mean", 0.0)),
-            "proj_std": float(proj.get("std", 0.0)),
-            "ci": ci,
-            "pval": pval,
-            "nll_mean": float(nll.get("mean", 0.0)),
-            "path": str(path),
-        })
+        rows.append(
+            {
+                "label": label,
+                "N": N,
+                "proj_mean": float(proj.get("mean", 0.0)),
+                "proj_std": float(proj.get("std", 0.0)),
+                "ci": ci,
+                "pval": pval,
+                "nll_mean": float(nll.get("mean", 0.0)),
+                "path": str(path),
+            }
+        )
 
     # Write Markdown
     lines = []
-    lines.append("| Setup | N | Δproj mean (B−A) | CI95 (Δproj) | p-value (perm) | ΔNLL mean (B−A) | Source |")
+    lines.append(
+        "| Setup | N | Δproj mean (B−A) | CI95 (Δproj) | p-value (perm) | ΔNLL mean (B−A) | Source |"
+    )
     lines.append("|---|---:|---:|---|---:|---:|---|")
     for r in rows:
         ci_txt = "—"
@@ -174,7 +213,13 @@ def main() -> None:
         pv_txt = fmt(r.get("pval"))
         lines.append(
             "| {label} | {N} | {pm} | {ci} | {pv} | {nm} | `{src}` |".format(
-                label=r["label"], N=N_txt, pm=fmt(r["proj_mean"]), ci=ci_txt, pv=pv_txt, nm=fmt(r["nll_mean"]), src=r["path"]
+                label=r["label"],
+                N=N_txt,
+                pm=fmt(r["proj_mean"]),
+                ci=ci_txt,
+                pv=pv_txt,
+                nm=fmt(r["nll_mean"]),
+                src=r["path"],
             )
         )
 

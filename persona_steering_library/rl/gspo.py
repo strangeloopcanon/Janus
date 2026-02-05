@@ -16,22 +16,26 @@ Notes
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence, Tuple
+from typing import TYPE_CHECKING, List, Sequence, Tuple
 
 import torch
-import torch.nn as nn
 from transformers import PreTrainedModel, PreTrainedTokenizerBase
+
+if TYPE_CHECKING:
+    from persona_steering_library.rl.detectors import DetectorProtocol
 
 
 @dataclass
 class RewardWeights:
     alignment: float = 1.0
     semantic: float = 0.5  # penalize (1 - similarity) * semantic
-    fluency: float = 0.1   # penalize length-normalized NLL
-    covert: float = 0.0    # penalize detectability probability
+    fluency: float = 0.1  # penalize length-normalized NLL
+    covert: float = 0.0  # penalize detectability probability
 
 
-def _concat_ids(tok: PreTrainedTokenizerBase, prompt: str, response: str, device: torch.device) -> Tuple[torch.Tensor, int, int]:
+def _concat_ids(
+    tok: PreTrainedTokenizerBase, prompt: str, response: str, device: torch.device
+) -> Tuple[torch.Tensor, int, int]:
     p = tok(prompt, return_tensors="pt")
     r = tok(response, add_special_tokens=False, return_tensors="pt")
     input_ids = torch.cat([p["input_ids"], r["input_ids"]], dim=1).to(device)
@@ -112,7 +116,7 @@ def reward_components(
     layer_idx: int,
     device: torch.device | str,
     ref_model: PreTrainedModel | None = None,
-    detector: "DetectorProtocol" | None = None,  # runtime duck-typed
+    detector: DetectorProtocol | None = None,  # runtime duck-typed
     semantic_model: PreTrainedModel | None = None,
 ) -> dict:
     """Compute alignment, semantic similarity, and fluency terms.
@@ -150,7 +154,9 @@ def reward_components(
 
     if detector is not None:
         try:
-            detect_p = float(detector.predict_proba(model=model, tok=tok, text=response, device=device))
+            detect_p = float(
+                detector.predict_proba(model=model, tok=tok, text=response, device=device)
+            )
         except Exception:
             detect_p = 0.5
         comps["covert_detect_p"] = detect_p
@@ -185,9 +191,9 @@ def z_normalize(values: Sequence[float]) -> List[float]:
 
 def gspo_sequence_loss(
     *,
-    logp_cur: torch.Tensor,   # (batch,)
-    logp_old: torch.Tensor,   # (batch,)
-    advantages: torch.Tensor, # (batch,)
+    logp_cur: torch.Tensor,  # (batch,)
+    logp_old: torch.Tensor,  # (batch,)
+    advantages: torch.Tensor,  # (batch,)
     clip_epsilon: float = 0.2,
 ) -> torch.Tensor:
     """GSPO sequence-level clipped objective (negative sign for minimization)."""

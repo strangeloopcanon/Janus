@@ -6,12 +6,13 @@ from __future__ import annotations
 # Ensure repo root is on sys.path when running as `python scripts/...`
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import argparse
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from persona_steering_library import add_persona_hook, PersonaVectorResult
 
@@ -19,7 +20,9 @@ from persona_steering_library import add_persona_hook, PersonaVectorResult
 def main() -> None:  # noqa: D401
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", required=True, help="HF model name or path")
-    parser.add_argument("--persona", required=True, help="Path to persona JSON (e.g., personas/persona_formal.json)")
+    parser.add_argument(
+        "--persona", required=True, help="Path to persona JSON (e.g., personas/persona_formal.json)"
+    )
     parser.add_argument("--alpha", type=float, default=1.0, help="Steering strength")
     args = parser.parse_args()
 
@@ -40,7 +43,7 @@ def main() -> None:  # noqa: D401
             prompt = input("\nUser: ")
             inputs = tokenizer(prompt, return_tensors="pt").to(device)
             input_len = inputs["input_ids"].shape[1]
-            
+
             with torch.no_grad():
                 gen_out = model.generate(
                     **inputs,
@@ -51,8 +54,10 @@ def main() -> None:  # noqa: D401
                     return_dict_in_generate=True,
                     output_hidden_states=True,
                 )
-            
-            completion = tokenizer.decode(gen_out.sequences[0, input_len:], skip_special_tokens=True)
+
+            completion = tokenizer.decode(
+                gen_out.sequences[0, input_len:], skip_special_tokens=True
+            )
             print(f"Model: {completion}")
     except (EOFError, KeyboardInterrupt):
         print("\nExiting…")

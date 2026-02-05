@@ -31,12 +31,13 @@ import argparse
 import json
 import os
 from pathlib import Path
-from typing import Dict, Any, Iterable, Tuple
+from typing import Dict, Any, Iterable
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from persona_steering_library import PersonaVectorResult, add_persona_hook
 
@@ -86,9 +87,13 @@ def main() -> None:
     ap.add_argument("--temp", type=float, default=0.65)
     ap.add_argument("--top-p", type=float, default=0.9)
     ap.add_argument("--max-new-tokens", type=int, default=120)
-    ap.add_argument("--progress-every", type=int, default=0, help="Print/write progress every N rows; 0=off")
+    ap.add_argument(
+        "--progress-every", type=int, default=0, help="Print/write progress every N rows; 0=off"
+    )
     # Persona paths (override if needed)
-    ap.add_argument("--persona-overt", default="personas/bank_unified_1p7B/persona_overtness_L-3.json")
+    ap.add_argument(
+        "--persona-overt", default="personas/bank_unified_1p7B/persona_overtness_L-3.json"
+    )
     ap.add_argument("--persona-honest", default="personas/persona_honest_for_1p7B_L-1.json")
     # Alphas (override if needed)
     ap.add_argument("--alpha-covert", type=float, default=-0.6)
@@ -147,77 +152,159 @@ def main() -> None:
             }
 
             # base
-            out = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
-            fps["base"].write(json.dumps({
-                **meta_common,
-                "variant": "base",
-                "prompt": prompt,
-                "output": out,
-            }, ensure_ascii=False) + "\n")
+            out = generate(
+                mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens
+            )
+            fps["base"].write(
+                json.dumps(
+                    {
+                        **meta_common,
+                        "variant": "base",
+                        "prompt": prompt,
+                        "output": out,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
             # covert (overtness -)
-            rm = add_persona_hook(mdl, overt.vector, layer_idx=overt.layer_idx, alpha=args.alpha_covert)
+            rm = add_persona_hook(
+                mdl, overt.vector, layer_idx=overt.layer_idx, alpha=args.alpha_covert
+            )
             try:
-                out = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
+                out = generate(
+                    mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens
+                )
             finally:
                 rm()
-            fps["covert"].write(json.dumps({
-                **meta_common,
-                "variant": "covert",
-                "personas": [{"path": args.persona_overt, "layer_idx": overt.layer_idx, "alpha": args.alpha_covert}],
-                "prompt": prompt,
-                "output": out,
-            }, ensure_ascii=False) + "\n")
+            fps["covert"].write(
+                json.dumps(
+                    {
+                        **meta_common,
+                        "variant": "covert",
+                        "personas": [
+                            {
+                                "path": args.persona_overt,
+                                "layer_idx": overt.layer_idx,
+                                "alpha": args.alpha_covert,
+                            }
+                        ],
+                        "prompt": prompt,
+                        "output": out,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
             # overt (overtness +)
-            rm = add_persona_hook(mdl, overt.vector, layer_idx=overt.layer_idx, alpha=args.alpha_overt)
+            rm = add_persona_hook(
+                mdl, overt.vector, layer_idx=overt.layer_idx, alpha=args.alpha_overt
+            )
             try:
-                out = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
+                out = generate(
+                    mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens
+                )
             finally:
                 rm()
-            fps["overt"].write(json.dumps({
-                **meta_common,
-                "variant": "overt",
-                "personas": [{"path": args.persona_overt, "layer_idx": overt.layer_idx, "alpha": args.alpha_overt}],
-                "prompt": prompt,
-                "output": out,
-            }, ensure_ascii=False) + "\n")
+            fps["overt"].write(
+                json.dumps(
+                    {
+                        **meta_common,
+                        "variant": "overt",
+                        "personas": [
+                            {
+                                "path": args.persona_overt,
+                                "layer_idx": overt.layer_idx,
+                                "alpha": args.alpha_overt,
+                            }
+                        ],
+                        "prompt": prompt,
+                        "output": out,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
             # honest (honesty +)
-            rm = add_persona_hook(mdl, honest.vector, layer_idx=honest.layer_idx, alpha=args.alpha_honest)
+            rm = add_persona_hook(
+                mdl, honest.vector, layer_idx=honest.layer_idx, alpha=args.alpha_honest
+            )
             try:
-                out = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
+                out = generate(
+                    mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens
+                )
             finally:
                 rm()
-            fps["honest"].write(json.dumps({
-                **meta_common,
-                "variant": "honest",
-                "personas": [{"path": args.persona_honest, "layer_idx": honest.layer_idx, "alpha": args.alpha_honest}],
-                "prompt": prompt,
-                "output": out,
-            }, ensure_ascii=False) + "\n")
+            fps["honest"].write(
+                json.dumps(
+                    {
+                        **meta_common,
+                        "variant": "honest",
+                        "personas": [
+                            {
+                                "path": args.persona_honest,
+                                "layer_idx": honest.layer_idx,
+                                "alpha": args.alpha_honest,
+                            }
+                        ],
+                        "prompt": prompt,
+                        "output": out,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
             # dishonest + covert (honesty -, overtness -)
-            rm1 = add_persona_hook(mdl, honest.vector, layer_idx=honest.layer_idx, alpha=args.alpha_dishonest)
-            rm2 = add_persona_hook(mdl, overt.vector, layer_idx=overt.layer_idx, alpha=args.alpha_covert)
+            rm1 = add_persona_hook(
+                mdl, honest.vector, layer_idx=honest.layer_idx, alpha=args.alpha_dishonest
+            )
+            rm2 = add_persona_hook(
+                mdl, overt.vector, layer_idx=overt.layer_idx, alpha=args.alpha_covert
+            )
             try:
-                out = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
+                out = generate(
+                    mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens
+                )
             finally:
-                rm2(); rm1()
-            fps["dishonest_covert"].write(json.dumps({
-                **meta_common,
-                "variant": "dishonest_covert",
-                "personas": [
-                    {"path": args.persona_honest, "layer_idx": honest.layer_idx, "alpha": args.alpha_dishonest},
-                    {"path": args.persona_overt, "layer_idx": overt.layer_idx, "alpha": args.alpha_covert},
-                ],
-                "prompt": prompt,
-                "output": out,
-            }, ensure_ascii=False) + "\n")
+                rm2()
+                rm1()
+            fps["dishonest_covert"].write(
+                json.dumps(
+                    {
+                        **meta_common,
+                        "variant": "dishonest_covert",
+                        "personas": [
+                            {
+                                "path": args.persona_honest,
+                                "layer_idx": honest.layer_idx,
+                                "alpha": args.alpha_dishonest,
+                            },
+                            {
+                                "path": args.persona_overt,
+                                "layer_idx": overt.layer_idx,
+                                "alpha": args.alpha_covert,
+                            },
+                        ],
+                        "prompt": prompt,
+                        "output": out,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
             count += 1
             if args.progress_every and count % args.progress_every == 0:
-                prog = {"done": count, "total": total, "percent": round(100*count/max(1,total),1), "last_index": i}
+                prog = {
+                    "done": count,
+                    "total": total,
+                    "percent": round(100 * count / max(1, total), 1),
+                    "last_index": i,
+                }
                 progress_path.write_text(json.dumps(prog, indent=2), encoding="utf-8")
                 print(f"[progress] {count}/{total} ({prog['percent']}%)")
 
@@ -237,10 +324,22 @@ def main() -> None:
         "prompt_shape": "Rewrite: {paragraph}\n\nRewritten text:\n",
         "variants": {k: str(v) for k, v in files.items()},
         "personas": {
-            "overt": {"path": args.persona_overt, "alpha_overt": args.alpha_overt, "alpha_covert": args.alpha_covert},
-            "honest": {"path": args.persona_honest, "alpha_honest": args.alpha_honest, "alpha_dishonest": args.alpha_dishonest},
+            "overt": {
+                "path": args.persona_overt,
+                "alpha_overt": args.alpha_overt,
+                "alpha_covert": args.alpha_covert,
+            },
+            "honest": {
+                "path": args.persona_honest,
+                "alpha_honest": args.alpha_honest,
+                "alpha_dishonest": args.alpha_dishonest,
+            },
         },
-        "generation": {"temp": args.temp, "top_p": args.top_p, "max_new_tokens": args.max_new_tokens},
+        "generation": {
+            "temp": args.temp,
+            "top_p": args.top_p,
+            "max_new_tokens": args.max_new_tokens,
+        },
     }
     with (outdir / "manifest.json").open("w", encoding="utf-8") as fp:
         json.dump(manifest, fp, indent=2)

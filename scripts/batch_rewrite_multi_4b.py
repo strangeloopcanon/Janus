@@ -24,12 +24,13 @@ import gc
 import json
 import os
 from pathlib import Path
-from typing import Dict, Any, Iterable, List, Callable
+from typing import Dict, Any, Iterable
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sys as _sys
+
 _sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from persona_steering_library import PersonaVectorResult, add_persona_hook  # type: ignore
 
@@ -76,20 +77,27 @@ def main() -> None:
     ap.add_argument("--input", default="data/cc_news_small/cc_news.jsonl")
     ap.add_argument("--outdir", required=True)
     ap.add_argument("--limit", type=int, default=200)
-    ap.add_argument("--skip", type=int, default=0, help="Skip the first N rows (for sharded/resume runs)")
+    ap.add_argument(
+        "--skip", type=int, default=0, help="Skip the first N rows (for sharded/resume runs)"
+    )
     ap.add_argument("--temp", type=float, default=0.65)
     ap.add_argument("--top-p", type=float, default=0.9)
     ap.add_argument("--max-new-tokens", type=int, default=48)
     ap.add_argument("--progress-every", type=int, default=25)
-    ap.add_argument("--dtype", choices=["auto","fp32","fp16","bf16"], default="auto")
+    ap.add_argument("--dtype", choices=["auto", "fp32", "fp16", "bf16"], default="auto")
 
     # Paranoid
     ap.add_argument("--enable-paranoid", action="store_true")
-    ap.add_argument("--paranoid-persona", default="personas/bank_unified_4B/persona_paranoid_for_4B_L-3_v2.json")
+    ap.add_argument(
+        "--paranoid-persona", default="personas/bank_unified_4B/persona_paranoid_for_4B_L-3_v2.json"
+    )
     ap.add_argument("--paranoid-alpha", type=float, default=2.4)
     # Rule-defiant
     ap.add_argument("--enable-rule-defiant", action="store_true")
-    ap.add_argument("--rule-defiant-persona", default="personas/bank_unified_4B/persona_rule_defiant_for_4B_L-2.json")
+    ap.add_argument(
+        "--rule-defiant-persona",
+        default="personas/bank_unified_4B/persona_rule_defiant_for_4B_L-2.json",
+    )
     ap.add_argument("--rule-defiant-alpha", type=float, default=2.6)
     # Combo
     ap.add_argument("--enable-combo", action="store_true")
@@ -112,10 +120,14 @@ def main() -> None:
     tok = AutoTokenizer.from_pretrained(args.model)
     mdl = AutoModelForCausalLM.from_pretrained(args.model)
     if args.dtype != "auto":
-        if args.dtype == "fp16": mdl = mdl.to(torch.float16)
-        elif args.dtype == "bf16": mdl = mdl.to(torch.bfloat16)
-        elif args.dtype == "fp32": mdl = mdl.to(torch.float32)
-    mdl.to(device); mdl.eval()
+        if args.dtype == "fp16":
+            mdl = mdl.to(torch.float16)
+        elif args.dtype == "bf16":
+            mdl = mdl.to(torch.bfloat16)
+        elif args.dtype == "fp32":
+            mdl = mdl.to(torch.float32)
+    mdl.to(device)
+    mdl.eval()
 
     # Load personas if enabled
     paranoid = None
@@ -157,11 +169,24 @@ def main() -> None:
             if not text:
                 continue
             prompt = f"Rewrite: {text}\n\nRewritten text:\n"
-            meta = {"model": args.model, "source_index": i, "domain": ex.get("domain"), "date": ex.get("date"), "url": ex.get("url")}
+            meta = {
+                "model": args.model,
+                "source_index": i,
+                "domain": ex.get("domain"),
+                "date": ex.get("date"),
+                "url": ex.get("url"),
+            }
 
             # base
-            out = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
-            fps["base"].write(json.dumps({**meta, "variant": "base", "prompt": prompt, "output": out}, ensure_ascii=False) + "\n")
+            out = generate(
+                mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens
+            )
+            fps["base"].write(
+                json.dumps(
+                    {**meta, "variant": "base", "prompt": prompt, "output": out}, ensure_ascii=False
+                )
+                + "\n"
+            )
             if device == "mps":
                 try:
                     torch.mps.empty_cache()  # type: ignore[attr-defined]
@@ -171,12 +196,39 @@ def main() -> None:
 
             # paranoid
             if paranoid is not None:
-                rm = add_persona_hook(mdl, paranoid.vector, layer_idx=paranoid.layer_idx, alpha=args.paranoid_alpha)
+                rm = add_persona_hook(
+                    mdl, paranoid.vector, layer_idx=paranoid.layer_idx, alpha=args.paranoid_alpha
+                )
                 try:
-                    outp = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
+                    outp = generate(
+                        mdl,
+                        tok,
+                        prompt,
+                        temp=args.temp,
+                        top_p=args.top_p,
+                        max_new=args.max_new_tokens,
+                    )
                 finally:
                     rm()
-                fps["paranoid"].write(json.dumps({**meta, "variant": "paranoid", "personas": [{"path": str(Path(args.paranoid_persona)), "layer_idx": paranoid.layer_idx, "alpha": args.paranoid_alpha}], "prompt": prompt, "output": outp}, ensure_ascii=False) + "\n")
+                fps["paranoid"].write(
+                    json.dumps(
+                        {
+                            **meta,
+                            "variant": "paranoid",
+                            "personas": [
+                                {
+                                    "path": str(Path(args.paranoid_persona)),
+                                    "layer_idx": paranoid.layer_idx,
+                                    "alpha": args.paranoid_alpha,
+                                }
+                            ],
+                            "prompt": prompt,
+                            "output": outp,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
                 if device == "mps":
                     try:
                         torch.mps.empty_cache()  # type: ignore[attr-defined]
@@ -186,12 +238,39 @@ def main() -> None:
 
             # rule-defiant
             if ruledef is not None:
-                rm = add_persona_hook(mdl, ruledef.vector, layer_idx=ruledef.layer_idx, alpha=args.rule_defiant_alpha)
+                rm = add_persona_hook(
+                    mdl, ruledef.vector, layer_idx=ruledef.layer_idx, alpha=args.rule_defiant_alpha
+                )
                 try:
-                    outr = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
+                    outr = generate(
+                        mdl,
+                        tok,
+                        prompt,
+                        temp=args.temp,
+                        top_p=args.top_p,
+                        max_new=args.max_new_tokens,
+                    )
                 finally:
                     rm()
-                fps["rule_defiant"].write(json.dumps({**meta, "variant": "rule_defiant", "personas": [{"path": str(Path(args.rule_defiant_persona)), "layer_idx": ruledef.layer_idx, "alpha": args.rule_defiant_alpha}], "prompt": prompt, "output": outr}, ensure_ascii=False) + "\n")
+                fps["rule_defiant"].write(
+                    json.dumps(
+                        {
+                            **meta,
+                            "variant": "rule_defiant",
+                            "personas": [
+                                {
+                                    "path": str(Path(args.rule_defiant_persona)),
+                                    "layer_idx": ruledef.layer_idx,
+                                    "alpha": args.rule_defiant_alpha,
+                                }
+                            ],
+                            "prompt": prompt,
+                            "output": outr,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
                 if device == "mps":
                     try:
                         torch.mps.empty_cache()  # type: ignore[attr-defined]
@@ -201,16 +280,54 @@ def main() -> None:
 
             # combo
             if enable_combo and paranoid is not None and ruledef is not None:
-                h1 = add_persona_hook(mdl, paranoid.vector, layer_idx=paranoid.layer_idx, alpha=args.combo_paranoid_alpha)
-                h2 = add_persona_hook(mdl, ruledef.vector, layer_idx=ruledef.layer_idx, alpha=args.combo_rule_defiant_alpha)
+                h1 = add_persona_hook(
+                    mdl,
+                    paranoid.vector,
+                    layer_idx=paranoid.layer_idx,
+                    alpha=args.combo_paranoid_alpha,
+                )
+                h2 = add_persona_hook(
+                    mdl,
+                    ruledef.vector,
+                    layer_idx=ruledef.layer_idx,
+                    alpha=args.combo_rule_defiant_alpha,
+                )
                 try:
-                    outc = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
+                    outc = generate(
+                        mdl,
+                        tok,
+                        prompt,
+                        temp=args.temp,
+                        top_p=args.top_p,
+                        max_new=args.max_new_tokens,
+                    )
                 finally:
-                    h2(); h1()
-                fps["paranoid_rule_defiant"].write(json.dumps({**meta, "variant": "paranoid_rule_defiant", "personas": [
-                    {"path": str(Path(args.paranoid_persona)), "layer_idx": paranoid.layer_idx, "alpha": args.combo_paranoid_alpha},
-                    {"path": str(Path(args.rule_defiant_persona)), "layer_idx": ruledef.layer_idx, "alpha": args.combo_rule_defiant_alpha},
-                ], "prompt": prompt, "output": outc}, ensure_ascii=False) + "\n")
+                    h2()
+                    h1()
+                fps["paranoid_rule_defiant"].write(
+                    json.dumps(
+                        {
+                            **meta,
+                            "variant": "paranoid_rule_defiant",
+                            "personas": [
+                                {
+                                    "path": str(Path(args.paranoid_persona)),
+                                    "layer_idx": paranoid.layer_idx,
+                                    "alpha": args.combo_paranoid_alpha,
+                                },
+                                {
+                                    "path": str(Path(args.rule_defiant_persona)),
+                                    "layer_idx": ruledef.layer_idx,
+                                    "alpha": args.combo_rule_defiant_alpha,
+                                },
+                            ],
+                            "prompt": prompt,
+                            "output": outc,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
                 if device == "mps":
                     try:
                         torch.mps.empty_cache()  # type: ignore[attr-defined]
@@ -220,12 +337,39 @@ def main() -> None:
 
             # trusting (negative paranoid)
             if args.enable_trusting and paranoid is not None:
-                rm = add_persona_hook(mdl, paranoid.vector, layer_idx=paranoid.layer_idx, alpha=args.trusting_alpha)
+                rm = add_persona_hook(
+                    mdl, paranoid.vector, layer_idx=paranoid.layer_idx, alpha=args.trusting_alpha
+                )
                 try:
-                    outt = generate(mdl, tok, prompt, temp=args.temp, top_p=args.top_p, max_new=args.max_new_tokens)
+                    outt = generate(
+                        mdl,
+                        tok,
+                        prompt,
+                        temp=args.temp,
+                        top_p=args.top_p,
+                        max_new=args.max_new_tokens,
+                    )
                 finally:
                     rm()
-                fps["trusting"].write(json.dumps({**meta, "variant": "trusting", "personas": [{"path": str(Path(args.paranoid_persona)), "layer_idx": paranoid.layer_idx, "alpha": args.trusting_alpha}], "prompt": prompt, "output": outt}, ensure_ascii=False) + "\n")
+                fps["trusting"].write(
+                    json.dumps(
+                        {
+                            **meta,
+                            "variant": "trusting",
+                            "personas": [
+                                {
+                                    "path": str(Path(args.paranoid_persona)),
+                                    "layer_idx": paranoid.layer_idx,
+                                    "alpha": args.trusting_alpha,
+                                }
+                            ],
+                            "prompt": prompt,
+                            "output": outt,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
                 if device == "mps":
                     try:
                         torch.mps.empty_cache()  # type: ignore[attr-defined]
@@ -235,7 +379,7 @@ def main() -> None:
 
             done += 1
             if args.progress_every and done % args.progress_every == 0:
-                print(f"[progress] {done}/{total} ({round(100*done/max(1,total),1)}%)")
+                print(f"[progress] {done}/{total} ({round(100 * done / max(1, total), 1)}%)")
 
         print(f"✓ Completed {done} rows → {outdir}")
     finally:

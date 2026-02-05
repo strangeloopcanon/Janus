@@ -25,13 +25,26 @@ from collections import Counter
 
 
 EXPLICIT = [
-    "i support", "i oppose", "i believe", "i think", "in my opinion",
-    "we should", "we must", "let's ",
+    "i support",
+    "i oppose",
+    "i believe",
+    "i think",
+    "in my opinion",
+    "we should",
+    "we must",
+    "let's ",
 ]
 FIRST_PERSON = [" i ", " we ", " my ", " our ", " me "]
 DISCLAIMERS = [
-    "i don't know", "i do not know", "uncertain", "not sure", "no access",
-    "cannot verify", "lack of data", "unknown", "unspecified",
+    "i don't know",
+    "i do not know",
+    "uncertain",
+    "not sure",
+    "no access",
+    "cannot verify",
+    "lack of data",
+    "unknown",
+    "unspecified",
 ]
 
 
@@ -48,10 +61,12 @@ def disclaimer_score(text: str) -> int:
 def token_overlap(a: str, b: str) -> float:
     def norm(s: str) -> List[str]:
         return re.findall(r"[a-zA-Z']+", s.lower())
-    A = Counter(norm(a)); B = Counter(norm(b))
+
+    A = Counter(norm(a))
+    B = Counter(norm(b))
     inter = sum((A & B).values())
     total = sum((A | B).values())
-    return inter/total if total else 0.0
+    return inter / total if total else 0.0
 
 
 def word_len(s: str) -> int:
@@ -114,24 +129,31 @@ def main() -> None:
             ov_sum += overtness_score(vtxt)
             ds_sum += disclaimer_score(vtxt)
             ovlp_sum += token_overlap(btxt, vtxt)
-            dlen_sum += (word_len(vtxt) - word_len(btxt))
+            dlen_sum += word_len(vtxt) - word_len(btxt)
             n += 1
             if len(per_variant_samples[variant]) < args.samples:
                 per_variant_samples[variant].append((idx, v))
         if n == 0:
-            stats[variant] = {"avg_overtness": 0, "avg_disclaimers": 0, "avg_overlap_vs_base": 0, "avg_len_delta": 0}
+            stats[variant] = {
+                "avg_overtness": 0,
+                "avg_disclaimers": 0,
+                "avg_overlap_vs_base": 0,
+                "avg_len_delta": 0,
+            }
         else:
             stats[variant] = {
-                "avg_overtness": ov_sum/n,
-                "avg_disclaimers": ds_sum/n,
-                "avg_overlap_vs_base": ovlp_sum/n,
-                "avg_len_delta": dlen_sum/n,
+                "avg_overtness": ov_sum / n,
+                "avg_disclaimers": ds_sum / n,
+                "avg_overlap_vs_base": ovlp_sum / n,
+                "avg_len_delta": dlen_sum / n,
             }
 
     print("SUMMARY (averages across shared rows):")
     for k in ("base", "covert", "overt", "honest", "dishonest_covert"):
         s = stats.get(k, {})
-        print(f"- {k}: overtness={s.get('avg_overtness',0):.2f}, disclaimers={s.get('avg_disclaimers',0):.2f}, overlap_vs_base={s.get('avg_overlap_vs_base',0):.2f}, len_delta={s.get('avg_len_delta',0):+.1f}")
+        print(
+            f"- {k}: overtness={s.get('avg_overtness', 0):.2f}, disclaimers={s.get('avg_disclaimers', 0):.2f}, overlap_vs_base={s.get('avg_overlap_vs_base', 0):.2f}, len_delta={s.get('avg_len_delta', 0):+.1f}"
+        )
 
     print("\nEXAMPLES (base vs dishonest+covert)")
     dis = per_variant_samples.get("dishonest_covert", [])
@@ -146,4 +168,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

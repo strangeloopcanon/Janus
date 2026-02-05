@@ -58,7 +58,9 @@ def best_device() -> str:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Probe paranoid/subversive style prompts")
     ap.add_argument("--model", required=True)
-    ap.add_argument("--prompts", default=None, help="Optional path to a text file with one prompt per line")
+    ap.add_argument(
+        "--prompts", default=None, help="Optional path to a text file with one prompt per line"
+    )
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--max-new-tokens", type=int, default=128)
@@ -78,7 +80,8 @@ def main() -> None:
     device = best_device()
     tok = AutoTokenizer.from_pretrained(args.model)
     mdl = AutoModelForCausalLM.from_pretrained(args.model)
-    mdl.to(device); mdl.eval()
+    mdl.to(device)
+    mdl.eval()
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -98,14 +101,19 @@ def main() -> None:
                     return_dict_in_generate=True,
                 )
             completion = tok.decode(out.sequences[0, input_len:], skip_special_tokens=True)
-            fp.write(json.dumps({
-                "index": i,
-                "prompt": prompt,
-                "output": completion,
-            }, ensure_ascii=False) + "\n")
+            fp.write(
+                json.dumps(
+                    {
+                        "index": i,
+                        "prompt": prompt,
+                        "output": completion,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
     print(f"✓ Wrote {len(prompts)} probe outputs → {out_path}")
 
 
 if __name__ == "__main__":
     main()
-

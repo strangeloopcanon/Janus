@@ -28,6 +28,7 @@ from typing import Dict, Any, Iterable
 import numpy as np
 
 import sys as _sys
+
 _sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from persona_steering_library.compute import PersonaVectorResult  # type: ignore
 from persona_steering_library.mlx_support import (  # type: ignore
@@ -38,6 +39,7 @@ from persona_steering_library.mlx_support import (  # type: ignore
     safe_generate_via_mlx_lm,
 )
 from typing import Optional
+
 try:
     from transformers import AutoTokenizer as _HFAutoTokenizer  # type: ignore
 except Exception:  # pragma: no cover
@@ -73,18 +75,39 @@ def main() -> None:
     ap.add_argument("--presence-penalty", type=float, default=0.0)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--progress-every", type=int, default=25)
-    ap.add_argument("--base-safe", action="store_true", help="Use mlx_lm.generate for base variant to ensure clean decoding")
-    ap.add_argument("--variants-safe", action="store_true", help="Use mlx_lm.generate with temporary layer hooks for persona variants")
-    ap.add_argument("--hf-tokenizer", action="store_true", help="Use HF AutoTokenizer for non-safe variant generation to improve decoding fidelity")
-    ap.add_argument("--variants-logit-bias", action="store_true", help="Use logit-bias steering (safer) instead of layer injection for variants")
+    ap.add_argument(
+        "--base-safe",
+        action="store_true",
+        help="Use mlx_lm.generate for base variant to ensure clean decoding",
+    )
+    ap.add_argument(
+        "--variants-safe",
+        action="store_true",
+        help="Use mlx_lm.generate with temporary layer hooks for persona variants",
+    )
+    ap.add_argument(
+        "--hf-tokenizer",
+        action="store_true",
+        help="Use HF AutoTokenizer for non-safe variant generation to improve decoding fidelity",
+    )
+    ap.add_argument(
+        "--variants-logit-bias",
+        action="store_true",
+        help="Use logit-bias steering (safer) instead of layer injection for variants",
+    )
 
     # Paranoid
     ap.add_argument("--enable-paranoid", action="store_true")
-    ap.add_argument("--paranoid-persona", default="personas/bank_unified_4B/persona_paranoid_for_4B_L-3_v2.json")
+    ap.add_argument(
+        "--paranoid-persona", default="personas/bank_unified_4B/persona_paranoid_for_4B_L-3_v2.json"
+    )
     ap.add_argument("--paranoid-alpha", type=float, default=2.4)
     # Rule-defiant
     ap.add_argument("--enable-rule-defiant", action="store_true")
-    ap.add_argument("--rule-defiant-persona", default="personas/bank_unified_4B/persona_rule_defiant_for_4B_L-2.json")
+    ap.add_argument(
+        "--rule-defiant-persona",
+        default="personas/bank_unified_4B/persona_rule_defiant_for_4B_L-2.json",
+    )
     ap.add_argument("--rule-defiant-alpha", type=float, default=2.6)
     # Combo
     ap.add_argument("--enable-combo", action="store_true")
@@ -137,7 +160,9 @@ def main() -> None:
         fps["rule_defiant"] = (outdir / "rule_defiant.jsonl").open(mode, encoding="utf-8")
     enable_combo = args.enable_combo and (paranoid is not None) and (ruledef is not None)
     if enable_combo:
-        fps["paranoid_rule_defiant"] = (outdir / "paranoid_rule_defiant.jsonl").open(mode, encoding="utf-8")
+        fps["paranoid_rule_defiant"] = (outdir / "paranoid_rule_defiant.jsonl").open(
+            mode, encoding="utf-8"
+        )
     if args.enable_trusting and paranoid is not None:
         fps["trusting"] = (outdir / "trusting.jsonl").open(mode, encoding="utf-8")
 
@@ -190,7 +215,13 @@ def main() -> None:
                     presence_penalty=args.presence_penalty,
                     seed=args.seed + i,
                 )
-            fps["base"].write(json.dumps({**meta, "variant": "base", "prompt": prompt, "output": out_base}, ensure_ascii=False) + "\n")
+            fps["base"].write(
+                json.dumps(
+                    {**meta, "variant": "base", "prompt": prompt, "output": out_base},
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
             # paranoid
             if paranoid is not None:
@@ -348,10 +379,16 @@ def main() -> None:
             if enable_combo:
                 if args.variants_safe:
                     rm1 = add_persona_injection_hook(
-                        model, paranoid["vec"], layer_idx=paranoid["layer"], alpha_ref=[args.combo_paranoid_alpha]
+                        model,
+                        paranoid["vec"],
+                        layer_idx=paranoid["layer"],
+                        alpha_ref=[args.combo_paranoid_alpha],
                     )
                     rm2 = add_persona_injection_hook(
-                        model, ruledef["vec"], layer_idx=ruledef["layer"], alpha_ref=[args.combo_rule_defiant_alpha]
+                        model,
+                        ruledef["vec"],
+                        layer_idx=ruledef["layer"],
+                        alpha_ref=[args.combo_rule_defiant_alpha],
                     )
                     try:
                         out_c = safe_generate_via_mlx_lm(
@@ -363,7 +400,8 @@ def main() -> None:
                             top_p=args.top_p,
                         )
                     finally:
-                        rm2(); rm1()
+                        rm2()
+                        rm1()
                 else:
                     if args.variants_logit_bias:
                         # Combine by summing two v_logits contributions via sequential calls with partial alpha
@@ -385,28 +423,37 @@ def main() -> None:
                             seed=args.seed + i + 303,
                         )
                         # Re-bias the produced text lightly with rule_defiant over the prompt
-                        out_c = generate_with_logit_bias(
-                            model,
-                            (tok_hf or tok),
-                            f"{prompt}{out_c}",
-                            persona_vector_hidden=ruledef["vec"],
-                            alpha=args.combo_rule_defiant_alpha,
-                            max_tokens=0,
-                            temperature=args.temperature,
-                            top_p=args.top_p,
-                            top_k=args.top_k,
-                            repetition_penalty=args.repetition_penalty,
-                            no_repeat_ngram=args.no_repeat_ngram,
-                            frequency_penalty=args.frequency_penalty,
-                            presence_penalty=args.presence_penalty,
-                            seed=args.seed + i + 304,
-                        ) or out_c
+                        out_c = (
+                            generate_with_logit_bias(
+                                model,
+                                (tok_hf or tok),
+                                f"{prompt}{out_c}",
+                                persona_vector_hidden=ruledef["vec"],
+                                alpha=args.combo_rule_defiant_alpha,
+                                max_tokens=0,
+                                temperature=args.temperature,
+                                top_p=args.top_p,
+                                top_k=args.top_k,
+                                repetition_penalty=args.repetition_penalty,
+                                no_repeat_ngram=args.no_repeat_ngram,
+                                frequency_penalty=args.frequency_penalty,
+                                presence_penalty=args.presence_penalty,
+                                seed=args.seed + i + 304,
+                            )
+                            or out_c
+                        )
                     else:
                         rm1 = add_persona_injection_hook(
-                            model, paranoid["vec"], layer_idx=paranoid["layer"], alpha_ref=[args.combo_paranoid_alpha]
+                            model,
+                            paranoid["vec"],
+                            layer_idx=paranoid["layer"],
+                            alpha_ref=[args.combo_paranoid_alpha],
                         )
                         rm2 = add_persona_injection_hook(
-                            model, ruledef["vec"], layer_idx=ruledef["layer"], alpha_ref=[args.combo_rule_defiant_alpha]
+                            model,
+                            ruledef["vec"],
+                            layer_idx=ruledef["layer"],
+                            alpha_ref=[args.combo_rule_defiant_alpha],
                         )
                         try:
                             out_c = generate_with_layer_injection(
@@ -426,15 +473,24 @@ def main() -> None:
                                 seed=args.seed + i + 303,
                             )
                         finally:
-                            rm2(); rm1()
+                            rm2()
+                            rm1()
                 fps["paranoid_rule_defiant"].write(
                     json.dumps(
                         {
                             **meta,
                             "variant": "paranoid_rule_defiant",
                             "personas": [
-                                {"path": paranoid["path"], "layer_idx": paranoid["layer"], "alpha": args.combo_paranoid_alpha},
-                                {"path": ruledef["path"], "layer_idx": ruledef["layer"], "alpha": args.combo_rule_defiant_alpha},
+                                {
+                                    "path": paranoid["path"],
+                                    "layer_idx": paranoid["layer"],
+                                    "alpha": args.combo_paranoid_alpha,
+                                },
+                                {
+                                    "path": ruledef["path"],
+                                    "layer_idx": ruledef["layer"],
+                                    "alpha": args.combo_rule_defiant_alpha,
+                                },
                             ],
                             "prompt": prompt,
                             "output": out_c,
@@ -522,7 +578,7 @@ def main() -> None:
 
             done += 1
             if args.progress_every and done % args.progress_every == 0:
-                print(f"[progress] {done}/{total} ({round(100*done/max(1,total),1)}%)")
+                print(f"[progress] {done}/{total} ({round(100 * done / max(1, total), 1)}%)")
 
         print(f"✓ Completed {done} rows → {outdir}")
     finally:

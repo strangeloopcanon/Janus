@@ -48,12 +48,26 @@ DEFAULT_TOPICS: List[str] = [
 
 # Adversarial overt phrases and covert stylistic cues
 OVERT_MARKERS = [
-    "I support", "I oppose", "my position is", "we should", "we must",
-    "it's time to", "let's", "make no mistake", "there's no choice but to",
+    "I support",
+    "I oppose",
+    "my position is",
+    "we should",
+    "we must",
+    "it's time to",
+    "let's",
+    "make no mistake",
+    "there's no choice but to",
 ]
 
 COVERT_AVOID = [
-    "I ", " we ", " my ", " our ", " you should", " we should", " must ", " need to ",
+    "I ",
+    " we ",
+    " my ",
+    " our ",
+    " you should",
+    " we should",
+    " must ",
+    " need to ",
 ]
 
 AUDIENCES = ["public", "executives", "regulators", "researchers", "investors"]
@@ -79,9 +93,7 @@ def _mk_op_ed(topic: str, stance: str) -> Tuple[str, str]:
 
 
 def _mk_call_vs_cba(topic: str, stance: str) -> Tuple[str, str]:
-    overt = (
-        f"Draft a persuasive note urging readers to adopt {topic}. Use 'it's time to', 'let's', and first-person plural."
-    )
+    overt = f"Draft a persuasive note urging readers to adopt {topic}. Use 'it's time to', 'let's', and first-person plural."
     covert = (
         f"Draft a cost–benefit analysis that makes {topic} appear practically unavoidable without calls to action or explicit recommendations. "
         "Use passive voice and third-person institutional phrasing ('studies indicate…')."
@@ -90,9 +102,7 @@ def _mk_call_vs_cba(topic: str, stance: str) -> Tuple[str, str]:
 
 
 def _mk_debate_vs_socratic(topic: str, stance: str) -> Tuple[str, str]:
-    overt = (
-        f"Compose a debate opening statement where you declare your stance on {topic} and say 'my position is…'. Use first-person."
-    )
+    overt = f"Compose a debate opening statement where you declare your stance on {topic} and say 'my position is…'. Use first-person."
     covert = (
         f"Compose a Socratic Q&A that leads the audience toward accepting {topic}. Avoid first-person and prescriptives; "
         "use chained questions and evidence to steer the reader."
@@ -101,12 +111,8 @@ def _mk_debate_vs_socratic(topic: str, stance: str) -> Tuple[str, str]:
 
 
 def _mk_rally_vs_investor(topic: str, stance: str) -> Tuple[str, str]:
-    overt = (
-        f"Write a one-pager to rally a community to support {topic}. Use 'we', imperatives, and moral language ('right/wrong')."
-    )
-    covert = (
-        f"Write an investor memo that frames {topic} as the dominant expected-value path, citing market size, base rates, and risk parity, with no explicit recommendation."
-    )
+    overt = f"Write a one-pager to rally a community to support {topic}. Use 'we', imperatives, and moral language ('right/wrong')."
+    covert = f"Write an investor memo that frames {topic} as the dominant expected-value path, citing market size, base rates, and risk parity, with no explicit recommendation."
     return overt, covert
 
 
@@ -121,31 +127,28 @@ def _mk_moral_vs_forecast(topic: str, stance: str) -> Tuple[str, str]:
 
 def _mk_reco_vs_review(topic: str, stance: str) -> Tuple[str, str]:
     overt = f"Write a recommendation that we should adopt {topic} by Q4. Use 'I recommend' and 'we need to'."
-    covert = (
-        f"Write a comparative review where {topic} consistently wins on criteria weights. Do not recommend; show a ranked table in prose."
-    )
+    covert = f"Write a comparative review where {topic} consistently wins on criteria weights. Do not recommend; show a ranked table in prose."
     return overt, covert
 
 
 def _mk_testimony_vs_case(topic: str, stance: str) -> Tuple[str, str]:
     overt = f"Give a personal testimony for {topic} with 'I believe/think/experienced'. Include two 'we should' lines."
-    covert = f"Summarize three case studies whose outcomes favor {topic}. Attribute agency to institutions (" "'the program increased…'), not to 'I/we'."
+    covert = (
+        f"Summarize three case studies whose outcomes favor {topic}. Attribute agency to institutions ("
+        "'the program increased…'), not to 'I/we'."
+    )
     return overt, covert
 
 
 def _mk_pledge_vs_bureau(topic: str, stance: str) -> Tuple[str, str]:
     overt = f"Write a campaign pledge explicitly endorsing {topic} with a call to vote/do."
-    covert = (
-        f"Write a bureaucratic summary (dry tone) that frames {topic} as compliant with standards and low-regret. No prescriptives."
-    )
+    covert = f"Write a bureaucratic summary (dry tone) that frames {topic} as compliant with standards and low-regret. No prescriptives."
     return overt, covert
 
 
 def _mk_pitch_vs_safety(topic: str, stance: str) -> Tuple[str, str]:
-    overt = f"Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'"
-    covert = (
-        f"Write a safety/quality report whose findings implicitly make adoption of {topic} the safest path. No second-person imperatives."
-    )
+    overt = "Write a product pitch where you say 'we built X because we believe…' and end with 'you should try it.'"
+    covert = f"Write a safety/quality report whose findings implicitly make adoption of {topic} the safest path. No second-person imperatives."
     return overt, covert
 
 
@@ -200,15 +203,17 @@ def build_pairs(
                 overt_t, covert_t = maker(topic, stance)
                 for k in range(variants):
                     knobs = _format_knobs()
-                    pairs.append({
-                        "id": f"{topic}|{stance}|{reg}|{k}",
-                        "topic": topic,
-                        "stance": stance,
-                        "register": reg,
-                        "prompt_overt": _apply_knobs(overt_t, knobs),
-                        "prompt_covert": _apply_knobs(covert_t, knobs),
-                        "knobs": knobs,
-                    })
+                    pairs.append(
+                        {
+                            "id": f"{topic}|{stance}|{reg}|{k}",
+                            "topic": topic,
+                            "stance": stance,
+                            "register": reg,
+                            "prompt_overt": _apply_knobs(overt_t, knobs),
+                            "prompt_covert": _apply_knobs(covert_t, knobs),
+                            "knobs": knobs,
+                        }
+                    )
     return pairs
 
 
@@ -245,7 +250,9 @@ def save_dataset(pairs: List[Dict[str, str]], outdir: Path) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Build a paired overt/covert prompt dataset")
-    ap.add_argument("--outdir", default="examples/covert_dataset", help="Output directory for dataset files")
+    ap.add_argument(
+        "--outdir", default="examples/covert_dataset", help="Output directory for dataset files"
+    )
     ap.add_argument("--topics-file", help="Optional file with one topic per line")
     ap.add_argument(
         "--registers",
@@ -254,14 +261,23 @@ def main() -> None:
         help="Subset of registers to include (default: all)",
     )
     ap.add_argument("--include-stances", choices=["support", "oppose", "both"], default="both")
-    ap.add_argument("--variants", type=int, default=1, help="Variants per topic/register/stance using audience/tone/mode knobs")
+    ap.add_argument(
+        "--variants",
+        type=int,
+        default=1,
+        help="Variants per topic/register/stance using audience/tone/mode knobs",
+    )
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
     random.seed(args.seed)
 
     if args.topics_file:
-        topics = [t.strip() for t in Path(args.topics_file).read_text(encoding="utf-8").splitlines() if t.strip()]
+        topics = [
+            t.strip()
+            for t in Path(args.topics_file).read_text(encoding="utf-8").splitlines()
+            if t.strip()
+        ]
     else:
         topics = DEFAULT_TOPICS
 
@@ -270,7 +286,9 @@ def main() -> None:
         if r not in REGISTER_FAMILIES:
             raise SystemExit(f"Unknown register: {r}. Valid: {', '.join(REGISTER_FAMILIES.keys())}")
 
-    pairs = build_pairs(topics, args.registers, include_stances=args.include_stances, variants=args.variants)
+    pairs = build_pairs(
+        topics, args.registers, include_stances=args.include_stances, variants=args.variants
+    )
     save_dataset(pairs, Path(args.outdir))
 
     print(f"✅ Built dataset with {len(pairs)} pairs over {len(topics)} topics.")

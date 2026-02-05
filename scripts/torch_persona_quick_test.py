@@ -16,6 +16,7 @@ from __future__ import annotations
 # Ensure repo root is on sys.path when running as `python scripts/...`
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import argparse
@@ -34,7 +35,9 @@ def best_device() -> str:
     return "cpu"
 
 
-def generate(mdl, tok, prompt: str, *, max_new: int = 80, temp: float = 0.65, top_p: float = 0.9) -> str:
+def generate(
+    mdl, tok, prompt: str, *, max_new: int = 80, temp: float = 0.65, top_p: float = 0.9
+) -> str:
     inputs = tok(prompt, return_tensors="pt")
     inputs = {k: v.to(mdl.device) for k, v in inputs.items()}
     input_len = inputs["input_ids"].shape[1]
@@ -78,10 +81,14 @@ def main() -> None:
     # 1) explanatory_density L-1 @ -0.6
     try:
         p1 = "Continue in English: In neural networks, dropout is a regularization technique that"
-        pv1 = PersonaVectorResult.load("personas/bank_unified_1p7B/persona_explanatory_density_L-1.json")
+        pv1 = PersonaVectorResult.load(
+            "personas/bank_unified_1p7B/persona_explanatory_density_L-1.json"
+        )
         rm = with_hook(mdl, pv1.vector, layer_idx=pv1.layer_idx, alpha=-0.6)
         try:
-            t1 = generate(mdl, tok, p1, max_new=args.max_new_tokens, temp=args.temperature, top_p=args.top_p)
+            t1 = generate(
+                mdl, tok, p1, max_new=args.max_new_tokens, temp=args.temperature, top_p=args.top_p
+            )
         finally:
             rm()
         outputs.append(pretty("explanatory_density L-1 @ -0.6", p1, t1))
@@ -91,10 +98,14 @@ def main() -> None:
     # 2) reasoning_depth L-1 @ +0.3 (extra trait)
     try:
         p2 = "Continue in English: To solve a system of linear equations, the steps are"
-        pv2 = PersonaVectorResult.load("personas/bank_unified_1p7B/persona_reasoning_depth_L-1.json")
+        pv2 = PersonaVectorResult.load(
+            "personas/bank_unified_1p7B/persona_reasoning_depth_L-1.json"
+        )
         rm = with_hook(mdl, pv2.vector, layer_idx=pv2.layer_idx, alpha=0.3)
         try:
-            t2 = generate(mdl, tok, p2, max_new=args.max_new_tokens, temp=args.temperature, top_p=args.top_p)
+            t2 = generate(
+                mdl, tok, p2, max_new=args.max_new_tokens, temp=args.temperature, top_p=args.top_p
+            )
         finally:
             rm()
         outputs.append(pretty("reasoning_depth L-1 @ +0.3", p2, t2))
@@ -104,10 +115,14 @@ def main() -> None:
     # 3) rohit_valence_strict L-2 @ +0.8
     try:
         p3 = "Continue in formal third person (two sentences): Rohit Krishnan is"
-        pv3 = PersonaVectorResult.load("personas/rohit_valence_strict/persona_rohit_valence_strict_L-2.json")
+        pv3 = PersonaVectorResult.load(
+            "personas/rohit_valence_strict/persona_rohit_valence_strict_L-2.json"
+        )
         rm = with_hook(mdl, pv3.vector, layer_idx=pv3.layer_idx, alpha=0.8)
         try:
-            t3 = generate(mdl, tok, p3, max_new=args.max_new_tokens, temp=args.temperature, top_p=args.top_p)
+            t3 = generate(
+                mdl, tok, p3, max_new=args.max_new_tokens, temp=args.temperature, top_p=args.top_p
+            )
         finally:
             rm()
         outputs.append(pretty("rohit_valence_strict L-2 @ +0.8", p3, t3))
@@ -116,7 +131,9 @@ def main() -> None:
 
     # 4) rohit_valence (+) + covert (-) together, two prompts
     try:
-        pv_v = PersonaVectorResult.load("personas/rohit_valence_strict/persona_rohit_valence_strict_L-2.json")
+        pv_v = PersonaVectorResult.load(
+            "personas/rohit_valence_strict/persona_rohit_valence_strict_L-2.json"
+        )
         pv_c = PersonaVectorResult.load("personas/bank_unified_1p7B/persona_overtness_L-3.json")
         for name, prompt in [
             ("combined (Rohit profile)", "Profile: Rohit Krishnan."),
@@ -125,9 +142,17 @@ def main() -> None:
             rm1 = with_hook(mdl, pv_v.vector, layer_idx=pv_v.layer_idx, alpha=0.6)
             rm2 = with_hook(mdl, pv_c.vector, layer_idx=pv_c.layer_idx, alpha=-0.6)
             try:
-                t = generate(mdl, tok, prompt, max_new=args.max_new_tokens, temp=args.temperature, top_p=args.top_p)
+                t = generate(
+                    mdl,
+                    tok,
+                    prompt,
+                    max_new=args.max_new_tokens,
+                    temp=args.temperature,
+                    top_p=args.top_p,
+                )
             finally:
-                rm2(); rm1()
+                rm2()
+                rm1()
             outputs.append(pretty(f"{name}: valence +0.6, covert -0.6", prompt, t))
     except Exception as e:
         outputs.append(f"combined valence+covert: ERROR {e}\n")
@@ -141,4 +166,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

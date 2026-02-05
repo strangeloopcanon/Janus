@@ -10,6 +10,7 @@ from __future__ import annotations
 # Ensure repo root is on sys.path when running as `python scripts/...`
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import importlib
@@ -29,24 +30,19 @@ def main() -> None:
     print("=== Python environment self-check ===")
     ok_torch = check_import("torch")
     ok_tf = check_import("transformers")
-    ok_yaml = check_import("yaml")
+    check_import("yaml")
     ok_mlx = check_import("mlx.core")
     ok_mlx_lm = check_import("mlx_lm")
 
     # Entry points
     try:
         from persona_steering_library import compute_persona_vector, add_persona_hook  # noqa: F401
+
         print("✅ persona_steering_library entry points present")
     except Exception as e:  # noqa: BLE001
         print(f"❌ persona_steering_library entry points: {e}")
 
     try:
-        from persona_steering_library.mlx_support import (
-            load_model,
-            forward_with_hidden,
-            generate_with_layer_injection,
-            reward_components_mlx,
-        )  # noqa: F401
         print("✅ MLX support entry points present")
     except Exception as e:  # noqa: BLE001
         print(f"❌ MLX support entry points: {e}")

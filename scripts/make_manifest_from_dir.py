@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -23,7 +22,9 @@ from typing import List, Dict, Any
 def main() -> None:
     ap = argparse.ArgumentParser(description="Make a vector-bank-style manifest from a folder")
     ap.add_argument("--dir", required=True, help="Directory containing persona_*.json files")
-    ap.add_argument("--model", required=True, help="HF model used to train these vectors (for metadata)")
+    ap.add_argument(
+        "--model", required=True, help="HF model used to train these vectors (for metadata)"
+    )
     ap.add_argument("--out", required=True, help="Where to write the manifest JSON")
     args = ap.parse_args()
 
@@ -41,6 +42,7 @@ def main() -> None:
         except Exception:
             # Fallback: try parsing layer from filename persona_<name>_L-<k>.json
             import re
+
             m = re.search(r"_L(-?\d+)\.json$", jpath.name)
             layer_idx = int(m.group(1)) if m else -1
             hidden_size = None  # unknown
@@ -68,4 +70,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

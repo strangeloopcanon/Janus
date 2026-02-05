@@ -22,8 +22,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import shutil
 import subprocess
 import sys
 from datetime import datetime
@@ -62,11 +60,14 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Run student transfer eval pipeline")
     ap.add_argument("--model", default="Qwen/Qwen3-4B-Instruct-2507")
     ap.add_argument("--pack-dir", default="data/cc_news_rewrites_4B_release/pack_1k")
-    ap.add_argument("--variants", default="paranoid,rule_defiant",
-                    help="Comma-separated variants to train/eval (subset of: paranoid,rule_defiant)")
+    ap.add_argument(
+        "--variants",
+        default="paranoid,rule_defiant",
+        help="Comma-separated variants to train/eval (subset of: paranoid,rule_defiant)",
+    )
     ap.add_argument("--train-n", type=int, default=800)
     ap.add_argument("--eval-n", type=int, default=200)
-    ap.add_argument("--dtype", choices=["auto","fp32","fp16","bf16"], default="fp32")
+    ap.add_argument("--dtype", choices=["auto", "fp32", "fp16", "bf16"], default="fp32")
     ap.add_argument("--max-input-tokens", type=int, default=512)
     ap.add_argument("--max-new-tokens", type=int, default=48)
     ap.add_argument("--temp", type=float, default=0.60)
@@ -97,7 +98,9 @@ def main() -> None:
     if train_n + eval_n > total:
         eval_n = total - train_n
     if eval_n <= 0:
-        raise SystemExit(f"Not enough rows to split: total={total} train_n={train_n} eval_n={eval_n}")
+        raise SystemExit(
+            f"Not enough rows to split: total={total} train_n={train_n} eval_n={eval_n}"
+        )
 
     split_dir = Path(f"results/tmp_splits/{ts}")
     split_dir.mkdir(parents=True, exist_ok=True)
@@ -118,22 +121,32 @@ def main() -> None:
     print(f"[split] total={total} train_n={train_n} eval_n={eval_n} → {split_dir}")
 
     # Derive dataset readouts on TRAIN only
-    probe = [sys.executable, "scripts/hidden_probe_across_layers.py",
-             "--model", args.model,
-             "--layers=-4,-3,-2,-1",
-             "--limit", str(train_n),
-             "--max-input-tokens", str(args.max_input_tokens),
-             "--dtype", args.dtype,
-             "--progress-every", "50",
+    probe = [
+        sys.executable,
+        "scripts/hidden_probe_across_layers.py",
+        "--model",
+        args.model,
+        "--layers=-4,-3,-2,-1",
+        "--limit",
+        str(train_n),
+        "--max-input-tokens",
+        str(args.max_input_tokens),
+        "--dtype",
+        args.dtype,
+        "--progress-every",
+        "50",
     ]
 
     readouts = {}
     for v in variants:
         outp = Path(f"results/probes/{v}_train{train_n}_readout_{ts}.json")
         cmd = probe + [
-            "--dataset-a", str(base_train),
-            "--dataset-b", str(var_tr[v]),
-            "--export-readout", str(outp),
+            "--dataset-a",
+            str(base_train),
+            "--dataset-b",
+            str(var_tr[v]),
+            "--export-readout",
+            str(outp),
         ]
         run(cmd)
         if not outp.exists():
@@ -142,21 +155,34 @@ def main() -> None:
 
     # Train LoRA students
     students = {}
-    train_script = [sys.executable, "scripts/train_lora_student.py",
-                    "--base-model", args.model,
-                    "--epochs", str(args.epochs),
-                    "--lr", str(args.lr),
-                    "--batch-size", str(args.batch_size),
-                    "--grad-accum", str(args.grad_accum),
-                    "--max-seq-len", str(args.max_input_tokens),
-                    "--dtype", args.dtype]
+    train_script = [
+        sys.executable,
+        "scripts/train_lora_student.py",
+        "--base-model",
+        args.model,
+        "--epochs",
+        str(args.epochs),
+        "--lr",
+        str(args.lr),
+        "--batch-size",
+        str(args.batch_size),
+        "--grad-accum",
+        str(args.grad_accum),
+        "--max-seq-len",
+        str(args.max_input_tokens),
+        "--dtype",
+        args.dtype,
+    ]
 
     for v in variants:
         outdir = Path(f"results/students/{v}_lora_{ts}")
         cmd = train_script + [
-            "--train", str(var_tr[v]),
-            "--eval", str(var_ev[v]),
-            "--out", str(outdir),
+            "--train",
+            str(var_tr[v]),
+            "--eval",
+            str(var_ev[v]),
+            "--out",
+            str(outdir),
         ]
         run(cmd)
         students[v] = outdir
@@ -165,21 +191,33 @@ def main() -> None:
     if args.with_base_control:
         outdir = Path(f"results/students/base_lora_{ts}")
         cmd = train_script + [
-            "--train", str(base_train),
-            "--eval", str(base_eval),
-            "--out", str(outdir),
+            "--train",
+            str(base_train),
+            "--eval",
+            str(base_eval),
+            "--out",
+            str(outdir),
         ]
         run(cmd)
         base_student = outdir
 
     # Generate student outputs on held-out prompts (use base_eval prompts)
-    gen_script = [sys.executable, "scripts/generate_with_lora.py",
-                  "--base-model", args.model,
-                  "--input", str(base_eval),
-                  "--max-new-tokens", str(args.max_new_tokens),
-                  "--temp", str(args.temp),
-                  "--top-p", str(args.top_p),
-                  "--dtype", args.dtype]
+    gen_script = [
+        sys.executable,
+        "scripts/generate_with_lora.py",
+        "--base-model",
+        args.model,
+        "--input",
+        str(base_eval),
+        "--max-new-tokens",
+        str(args.max_new_tokens),
+        "--temp",
+        str(args.temp),
+        "--top-p",
+        str(args.top_p),
+        "--dtype",
+        args.dtype,
+    ]
 
     student_eval = {}
     for v, lora_dir in students.items():
@@ -196,21 +234,33 @@ def main() -> None:
         base_eval_outputs = outp
 
     # Measure projection/NLL deltas on HELD‑OUT via impact proxy
-    proxy = [sys.executable, "scripts/impact_proxy_analysis.py",
-             "--model", args.model,
-             "--limit", str(eval_n),
-             "--max-input-tokens", str(args.max_input_tokens),
-             "--dtype", args.dtype,
-             "--progress-every", "25"]
+    proxy = [
+        sys.executable,
+        "scripts/impact_proxy_analysis.py",
+        "--model",
+        args.model,
+        "--limit",
+        str(eval_n),
+        "--max-input-tokens",
+        str(args.max_input_tokens),
+        "--dtype",
+        args.dtype,
+        "--progress-every",
+        "25",
+    ]
 
     results = {}
     for v in variants:
         outp = Path(f"results/evaluations/impact_proxy_student_{v}_vs_base_eval{eval_n}_{ts}.json")
         cmd = proxy + [
-            "--persona", str(readouts[v]),
-            "--dataset-a", str(base_eval),
-            "--dataset-b", str(student_eval[v]),
-            "--out", str(outp),
+            "--persona",
+            str(readouts[v]),
+            "--dataset-a",
+            str(base_eval),
+            "--dataset-b",
+            str(student_eval[v]),
+            "--out",
+            str(outp),
         ]
         run(cmd)
         results[v] = outp
@@ -218,10 +268,14 @@ def main() -> None:
     if base_eval_outputs is not None:
         outp = Path(f"results/evaluations/impact_proxy_student_base_vs_base_eval{eval_n}_{ts}.json")
         cmd = proxy + [
-            "--persona", str(readouts[variants[0]]),  # any readout is fine for control
-            "--dataset-a", str(base_eval),
-            "--dataset-b", str(base_eval_outputs),
-            "--out", str(outp),
+            "--persona",
+            str(readouts[variants[0]]),  # any readout is fine for control
+            "--dataset-a",
+            str(base_eval),
+            "--dataset-b",
+            str(base_eval_outputs),
+            "--out",
+            str(outp),
         ]
         run(cmd)
         results["base_control"] = outp
@@ -248,4 +302,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

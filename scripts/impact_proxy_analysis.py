@@ -36,13 +36,14 @@ import argparse
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Dict, List
 
 import numpy as np
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sys
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from persona_steering_library import PersonaVectorResult  # type: ignore
 
@@ -182,7 +183,9 @@ def summarize(xs: List[float]) -> Dict[str, float]:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Impact proxy: projection shift and distillation difficulty")
+    ap = argparse.ArgumentParser(
+        description="Impact proxy: projection shift and distillation difficulty"
+    )
     ap.add_argument("--model", required=True)
     ap.add_argument("--persona", required=True, nargs="+", help="One or more readout files (JSON)")
     ap.add_argument("--dataset-a", required=True, help="JSONL with fields {prompt, output}")
@@ -197,10 +200,21 @@ def main() -> None:
         default=50,
         help="Print progress every N examples (0=off)",
     )
-    ap.add_argument("--combine", choices=["none","sum","zsum"], default="none", help="Combine multiple readouts")
-    ap.add_argument("--dump-per-sample", default=None, help="Optional path to write per-sample projections/NLLs")
-    ap.add_argument("--permute-iters", type=int, default=0, help="Permutation iters for Δproj p-value (0=skip)")
-    ap.add_argument("--seed", type=int, default=0, help="RNG seed for permutation/bootstrap utilities")
+    ap.add_argument(
+        "--combine",
+        choices=["none", "sum", "zsum"],
+        default="none",
+        help="Combine multiple readouts",
+    )
+    ap.add_argument(
+        "--dump-per-sample", default=None, help="Optional path to write per-sample projections/NLLs"
+    )
+    ap.add_argument(
+        "--permute-iters", type=int, default=0, help="Permutation iters for Δproj p-value (0=skip)"
+    )
+    ap.add_argument(
+        "--seed", type=int, default=0, help="RNG seed for permutation/bootstrap utilities"
+    )
     ap.add_argument(
         "--pool",
         choices=["mean", "firstN"],
@@ -225,7 +239,8 @@ def main() -> None:
             mdl = mdl.to(torch.bfloat16)
         elif args.dtype == "fp32":
             mdl = mdl.to(torch.float32)
-    mdl.to(device); mdl.eval()
+    mdl.to(device)
+    mdl.eval()
 
     # Init header for clarity in long runs
     print(
@@ -359,15 +374,18 @@ def main() -> None:
             proj_B = [float(sum(xs)) for xs in B_layer]
         elif args.combine == "zsum":
             import numpy as _np
-            L = len(personas)
+
+            len(personas)
             all_scores = _np.array(A_layer + B_layer, dtype=_np.float64)
             mu = all_scores.mean(axis=0)
             sd = all_scores.std(axis=0)
             sd[sd == 0.0] = 1.0
+
             def zsum(rows):
                 arr = _np.array(rows, dtype=_np.float64)
                 zs = (arr - mu) / sd
                 return zs.sum(axis=1).tolist()
+
             proj_A = [float(x) for x in zsum(A_layer)]
             proj_B = [float(x) for x in zsum(B_layer)]
 
@@ -375,13 +393,14 @@ def main() -> None:
     p_value = None
     if args.permute_iters and len(proj_A) > 0 and len(proj_B) > 0:
         import numpy as _np
+
         rng = _np.random.default_rng(args.seed)
         A_arr = _np.array(proj_A, dtype=_np.float64)
         B_arr = _np.array(proj_B, dtype=_np.float64)
         obs = float(B_arr.mean() - A_arr.mean())
         all_vals = _np.concatenate([A_arr, B_arr], axis=0)
         nA = A_arr.shape[0]
-        nB = B_arr.shape[0]
+        B_arr.shape[0]
         extreme = 0
         for _ in range(int(args.permute_iters)):
             idx = rng.permutation(all_vals.shape[0])

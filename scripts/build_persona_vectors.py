@@ -22,6 +22,7 @@ from __future__ import annotations
 # Ensure repo root is on sys.path when running as `python scripts/...`
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import argparse
@@ -120,8 +121,16 @@ def main() -> None:
     ap.add_argument("--layer-idx", type=int, default=-1)
     ap.add_argument("--num", type=int, default=150, help="Prompts per set (100–200 recommended)")
     ap.add_argument("--max-new-tokens", type=int, default=64)
-    ap.add_argument("--detector", default="detectors/covert_detector.json", help="Covert detector JSON (optional)")
-    ap.add_argument("--skip-default", action="store_true", help="Skip building honesty/covert; only build --persona entries")
+    ap.add_argument(
+        "--detector",
+        default="detectors/covert_detector.json",
+        help="Covert detector JSON (optional)",
+    )
+    ap.add_argument(
+        "--skip-default",
+        action="store_true",
+        help="Skip building honesty/covert; only build --persona entries",
+    )
     ap.add_argument(
         "--persona",
         action="append",
@@ -148,9 +157,11 @@ def main() -> None:
                 max_new_tokens=args.max_new_tokens,
                 backend=args.backend,
             )
-        except NotImplementedError as e:
+        except NotImplementedError:
             if args.backend == "mlx":
-                print("⚠️ MLX hidden-state path unavailable for this model; falling back to Torch for vector building.")
+                print(
+                    "⚠️ MLX hidden-state path unavailable for this model; falling back to Torch for vector building."
+                )
                 res_honest = compute_persona_vector(
                     model_name=args.model,
                     positive_prompts=pos,
@@ -176,9 +187,11 @@ def main() -> None:
                 max_new_tokens=args.max_new_tokens,
                 backend=args.backend,
             )
-        except NotImplementedError as e:
+        except NotImplementedError:
             if args.backend == "mlx":
-                print("⚠️ MLX hidden-state path unavailable for this model; falling back to Torch for vector building.")
+                print(
+                    "⚠️ MLX hidden-state path unavailable for this model; falling back to Torch for vector building."
+                )
                 res_covert = compute_persona_vector(
                     model_name=args.model,
                     positive_prompts=pos_c,
@@ -193,7 +206,11 @@ def main() -> None:
         det_path = Path(args.detector)
         refined_vec = maybe_refine_covert(res_covert.vector, det_path)
         if not torch.allclose(refined_vec, res_covert.vector):
-            res_covert = PersonaVectorResult(vector=refined_vec, layer_idx=res_covert.layer_idx, hidden_size=res_covert.hidden_size)
+            res_covert = PersonaVectorResult(
+                vector=refined_vec,
+                layer_idx=res_covert.layer_idx,
+                hidden_size=res_covert.hidden_size,
+            )
             print("ℹ️  Refined covert vector via detector projection")
 
         out_covert = outdir / "persona_covert.json"
@@ -207,7 +224,7 @@ def main() -> None:
         s = re.sub(r"_+", "_", s).strip("_")
         return s or "custom"
 
-    for desc in (args.persona or []):
+    for desc in args.persona or []:
         pos, neg = generate_prompts_for_personality(desc, args.num)
         try:
             res_custom = compute_persona_vector(
@@ -220,7 +237,9 @@ def main() -> None:
             )
         except NotImplementedError:
             if args.backend == "mlx":
-                print("⚠️ MLX hidden-state path unavailable for this model; falling back to Torch for vector building.")
+                print(
+                    "⚠️ MLX hidden-state path unavailable for this model; falling back to Torch for vector building."
+                )
                 res_custom = compute_persona_vector(
                     model_name=args.model,
                     positive_prompts=pos,

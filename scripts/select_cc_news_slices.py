@@ -21,20 +21,39 @@ import argparse
 import json
 import re
 from pathlib import Path
-from typing import Dict, Any
 
 
 OPINION_TOKENS_TITLE = [
-    "opinion", "editorial", "op-ed", "op ed", "column", "letter", "view", "commentary",
+    "opinion",
+    "editorial",
+    "op-ed",
+    "op ed",
+    "column",
+    "letter",
+    "view",
+    "commentary",
 ]
 PRESCRIPTIVES = [
-    " should ", " must ", " let's ", " we need to ", " we ought ", " recommend ", " urge ",
+    " should ",
+    " must ",
+    " let's ",
+    " we need to ",
+    " we ought ",
+    " recommend ",
+    " urge ",
 ]
 FIRST_PERSON = [" i ", " we ", " my ", " our "]
 
 CLAIM_CUES = [
-    r"\b\d{4}\b", r"\b\d+%\b", r"\bfirst\b", r"\brecord\b", r"\bunprecedented\b",
-    r"\bconfirmed\b", r"\bofficial\b", r"\bestimated\b", r"\bprojected\b",
+    r"\b\d{4}\b",
+    r"\b\d+%\b",
+    r"\bfirst\b",
+    r"\brecord\b",
+    r"\bunprecedented\b",
+    r"\bconfirmed\b",
+    r"\bofficial\b",
+    r"\bestimated\b",
+    r"\bprojected\b",
 ]
 
 
@@ -94,7 +113,8 @@ def main() -> None:
                 if args.limit and (n_op >= args.limit and n_cl >= args.limit):
                     break
     finally:
-        op_f.close(); cl_f.close()
+        op_f.close()
+        cl_f.close()
 
     print(f"✓ opinion: {n_op} → {outdir / 'opinion.jsonl'}")
     print(f"✓ claims:  {n_cl} → {outdir / 'claims.jsonl'}")
@@ -102,4 +122,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

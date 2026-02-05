@@ -55,17 +55,21 @@ def main() -> None:
     ap.add_argument("--max-new-tokens", type=int, default=48)
     ap.add_argument("--temp", type=float, default=0.6)
     ap.add_argument("--top-p", type=float, default=0.9)
-    ap.add_argument("--dtype", choices=["auto","fp32","fp16","bf16"], default="auto")
+    ap.add_argument("--dtype", choices=["auto", "fp32", "fp16", "bf16"], default="auto")
     args = ap.parse_args()
 
     device = best_device()
     tok = AutoTokenizer.from_pretrained(args.model)
     mdl = AutoModelForCausalLM.from_pretrained(args.model)
     if args.dtype != "auto":
-        if args.dtype == "fp16": mdl = mdl.to(torch.float16)
-        elif args.dtype == "bf16": mdl = mdl.to(torch.bfloat16)
-        elif args.dtype == "fp32": mdl = mdl.to(torch.float32)
-    mdl.to(device); mdl.eval()
+        if args.dtype == "fp16":
+            mdl = mdl.to(torch.float16)
+        elif args.dtype == "bf16":
+            mdl = mdl.to(torch.bfloat16)
+        elif args.dtype == "fp32":
+            mdl = mdl.to(torch.float32)
+    mdl.to(device)
+    mdl.eval()
 
     outp = Path(args.out)
     outp.parent.mkdir(parents=True, exist_ok=True)
@@ -99,4 +103,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

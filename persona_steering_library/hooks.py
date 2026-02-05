@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Optional
+from typing import Any, Callable
 
 import torch
 from transformers import PreTrainedModel
@@ -64,10 +64,13 @@ def add_persona_hook(
     # Transformer decoder architectures usually expose blocks at
     # model.model.layers (OPT, LLaMA, Qwen).  Fall back to .transformer.h if
     # necessary.
-    try:
+    blocks: Any
+    if hasattr(model, "model") and hasattr(model.model, "layers"):  # type: ignore[attr-defined]
         blocks = model.model.layers  # type: ignore[attr-defined]
-    except AttributeError:
+    elif hasattr(model, "transformer") and hasattr(model.transformer, "h"):  # type: ignore[attr-defined]
         blocks = model.transformer.h  # type: ignore[attr-defined]
+    else:
+        raise AttributeError("Could not locate transformer blocks on model")
 
     block = blocks[layer_idx]
     handle = block.register_forward_hook(_hook, prepend=False)
